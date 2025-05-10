@@ -202,21 +202,46 @@
     font-weight: 700;
   }
 
+      /*                                            About Us                                              */
 
 
-    /*                                            Real Time Parking Availability                                                */
+.about-us {
+  display: flex;
+  align-items: center;
+  background-color: hsla(197, 5%, 30%, 0.341);
+  gap: 100px;
+}
 
-  #available-slots{
-    height: 180px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    line-height: 1.2;
-    padding: 10px;   
-  }
+
+.about-us-image{
+  width:50%;
+  height: 80vh;
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+  url(https://arab-security.com/wp-content/uploads/2024/08/parking-1024x1024.png);
+  background-size: cover;
+  background-position: center;
+}
+
+.content-section {
+  width: 40vw;
+  padding: 20em;
+  padding: 25px;
+  text-align: justify;
+  font-family: Open Sans;
+}
+
+.content-section h1 {
+  font-size: 30px;
+  margin-bottom: 20px;
+  color: #25255d;
+  text-align: center;
+}
+
+.content-section p {
+  font-size: 16px;
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
 
 
   
@@ -230,14 +255,14 @@
 
 .triangle{
   position: absolute;
-  right: -10px;
-  width: 1000px;
+  right: 0;
+  width: 49.5vw;
   height: 700px;
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+  url('https://i.pinimg.com/736x/06/46/bc/0646bc90973237a5a0c502e711db9091.jpg');
   background-size: cover;
   background-position: right;
-  clip-path: polygon(100% 0, 100% 100%, 0 0);
-  background-image: url('https://i.pinimg.com/736x/06/46/bc/0646bc90973237a5a0c502e711db9091.jpg');
-  
 }
 
 .feature-list{
@@ -245,10 +270,12 @@
   display: flex;
   flex-direction: column;
   gap: 30px;
+  background-color: #25255d4b;
+  height:700px;
 }
 
 .feature-list h1{
-  font-size:48px;
+  font-size:30px;
   color: #25255d;
   text-align: center;
   max-width: 40vw;
@@ -260,8 +287,16 @@
 
 .feature-list li{
   margin-bottom: 22px;
-  font-size: 26px;
+  font-size: 16px;
   letter-spacing: 1px;
 }
 
+.feature-list li i{
+  color: #fff;
+  font-size: 56px;
+  border: 1px solid white;
+  border-radius: 50%;
+  padding: 15px;
+  background-color: #2c3e50;
+}
   
