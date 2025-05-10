@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Parking Management System</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-parking"></i>
+                <span>Admin Panel</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-tab="permits">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Permit Requests</span>
+                </li>
+                <li data-tab="employees">
+                    <i class="fas fa-users"></i>
+                    <span>Employees</span>
+                </li>
+                <li data-tab="violations">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Violations</span>
+                </li>
+                <li data-tab="visitors">
+                    <i class="fas fa-user-friends"></i>
+                    <span>Visitors</span>
+                </li>
+                <li id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <!-- Permits Section -->
+            <section id="permits" class="tab-content active">
+                <div class="header">
+                    <h2>Permit Requests</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <h3>Pending</h3>
+                            <p id="pendingCount">5</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Approved</h3>
+                            <p id="approvedCount">12</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Vehicle No.</th>
+                                <th>Request Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="permitTableBody">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Employees Section -->
+            <section id="employees" class="tab-content">
+                <div class="header">
+                    <h2>Employees</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <h3>Total Employees</h3>
+                            <p id="totalEmployees">25</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Vehicle No.</th>
+                                <th>Permit Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeTableBody">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Violations Section -->
+            <section id="violations" class="tab-content">
+                <div class="header">
+                    <h2>Violations</h2>
+                    <button class="add-btn" id="addViolationBtn">
+                        <i class="fas fa-plus"></i> Add New Violation
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Vehicle No.</th>
+                                <th>Type</th>
+                                <th>Fine Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="violationTableBody">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Visitors Section -->
+            <section id="visitors" class="tab-content">
+                <div class="header">
+                    <h2>Visitors</h2>
+                    <button class="add-btn" id="addVisitorBtn">
+                        <i class="fas fa-plus"></i> Add New Visitor
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Vehicle No.</th>
+                                <th>Purpose</th>
+                                <th>Phone</th>
+                                <th>Entry Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visitorTableBody">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Adding Violation -->
+    <div id="violationModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Violation</h2>
+            <form id="violationForm">
+                <div class="form-group">
+                    <input type="text" id="violationVehicle" placeholder="Vehicle Number" required>
+                </div>
+                <div class="form-group">
+                    <select id="violationType" required>
+                        <option value="">Select Violation Type</option>
+                        <option value="Wrong Parking">Wrong Parking</option>
+                        <option value="No Permit">No Permit</option>
+                        <option value="Expired Permit">Expired Permit</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="fineAmount" placeholder="Fine Amount" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="violationNotes" placeholder="Additional Notes"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit">Submit</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Visitor -->
+    <div id="visitorModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Visitor</h2>
+            <form id="visitorForm">
+                <div class="form-group">
+                    <input type="text" id="visitorName" placeholder="Visitor Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="visitorVehicle" placeholder="Vehicle Number" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="visitPurpose" placeholder="Purpose of Visit" required>
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="visitorPhone" placeholder="Phone Number" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit">Submit</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
