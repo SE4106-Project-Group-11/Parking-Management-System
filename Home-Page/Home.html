@@ -18,14 +18,13 @@
       </div> 
     </aside>
 
-    <main class="main-content">
+    <main id="main" class="main-content">
       <header class="navbar">
         <ul>
-          <li><a href="#">HOME</a></li>
-          <li><a href="#">GARAGE</a></li>
-          <li><a href="#">ABOUT US</a></li>
-          <li><a href="#">FAQ</a></li>
-          <li><a href="#">CONTACTS</a></li>
+          <li><a href="#main">HOME</a></li>
+          <li><a href="#about-us">ABOUT US</a></li>
+          <li><a href="#features">FEATURES</a></li>
+          <li><a href="#how">HOW IT WORKS</a></li>
         </ul>
         <div id="button-line">
           <div class="main-buttons"><a href="#">Register</a></div>
@@ -34,7 +33,7 @@
       </header>
 
       <section class="word-container">
-        <div class="text">
+        <div class="text reveal">
           <h1>
             EFFORTLESS<br>
             OFFICE<br>
@@ -43,10 +42,10 @@
             HERE
           </h1>
           <p class="slogan">Manage permits, find spots, and avoid violations with ease.</p>
-          <button class="btn">Request Parking Permit</button>
+          <button class="btn reveal">Request Parking Permit</button>
         </div>
 
-        <div class="flipping-card">
+        <div class="flipping-card reveal">
           <div class="card-container">
             <div class="card front-face">
               <h1>Real Time Parking Availability</h1>
@@ -63,12 +62,12 @@
   </div>
 
   <!--   About Us  -->
-     <div class="about-us">
+     <div id="about-us" class="about-us">
     <div class="about-us-image">
     </div>    
     <div class="content-section">
-      <h1>About us</h1>
-      <p>
+      <h1 class="reveal">About us</h1>
+      <p class="reveal">
         Welcome to the Vehicle Parking Management System – a smart, secure, and user-friendly solution developed to revolutionize 
         how parking is handled in modern institutions and workplaces. Designed by a team of passionate software engineering undergraduates 
         from the Faculty of Computing, Sabaragamuwa University of Sri Lanka, our system addresses the daily challenges of parking allocation, 
@@ -82,27 +81,27 @@
   </div>
 
   <!-- System Features -->
-  <section class="features-container">
+  <section id="features" class="features-container">
     <div class="triangle1"></div>
     <div class="feature-list">
-      <h1>Features We Provide</h1>
+      <h1 class="reveal">Features We Provide</h1>
       <ul>
-        <li><span><i class='bx bxs-lock'></i> Employee registration and secure login system</span></li>
-        <li><span><i class='bx bx-qr-scan' ></i> Apply for digital parking permits with QR codes</span></li>
-        <li><span><i class='bx bxs-registered' ></i> Admin-assisted visitor and non-employee registration</span></li>
-        <li><span><i class='bx bxs-car' ></i> Real-time parking space availability tracking</span></li>
-        <li><span><i class='bx bxs-error' ></i> Parking violation notifications and fine enforcement</span></li>
-        <li><span><i class='bx bxs-credit-card' ></i> Online rent and fine payments for non-employees</span></li>
-        <li><span><i class='bx bxs-dashboard' ></i> Admin dashboard with live activity and reports</span></li>
+        <li class="reveal"><span><i class='bx bxs-lock'></i> Employee registration and secure login system</span></li>
+        <li class="reveal"><span><i class='bx bx-qr-scan' ></i> Apply for digital parking permits with QR codes</span></li>
+        <li class="reveal"><span><i class='bx bxs-registered' ></i> Admin-assisted visitor and non-employee registration</span></li>
+        <li class="reveal"><span><i class='bx bxs-car' ></i> Real-time parking space availability tracking</span></li>
+        <li class="reveal"><span><i class='bx bxs-error' ></i> Parking violation notifications and fine enforcement</span></li>
+        <li class="reveal"><span><i class='bx bxs-credit-card' ></i> Online rent and fine payments for non-employees</span></li>
+        <li class="reveal"><span><i class='bx bxs-dashboard' ></i> Admin dashboard with live activity and reports</span></li>
       </ul>
       <div class="triangle2"></div>
     </div>
   </section>
 
   <!--  How It Works -->
-   <section class="how">
-  <h1>How It Works</h1>
-  <div class="steps">
+   <section id="how" class="how">
+  <h1 class="reveal">How It Works</h1>
+  <div class="steps reveal">
     <div class="step-container">
       <div class="small-triangle small-triangle-1"></div>
       <div class="step">
@@ -146,5 +145,6 @@
   </footer>
 </section>
 
+<script src="Home.js"></script>
 </body>
 </html>
