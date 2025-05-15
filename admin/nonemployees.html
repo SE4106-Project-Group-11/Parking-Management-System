@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Employees - Admin Panel</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Admin Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-id-card"></i> Permit Requests</a></li>
+                <li><a href="employees.html"><i class="fas fa-users"></i> Employees</a></li>
+                <li><a href="nonemployees.html" class="active"><i class="fas fa-user"></i> Non-Employees</a></li>
+                <li><a href="violation-management.html"><i class="fas fa-exclamation-triangle"></i> Violations</a></li>
+                <li><a href="visitors.html"><i class="fas fa-user-friends"></i> Visitors</a></li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li><a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <h1>Non-Employees</h1>
+            
+            <!-- Status Cards -->
+            <div class="status-cards">
+                <div class="card status-card">
+                    <h3>Total</h3>
+                    <div class="count" id="totalCount">8</div>
+                </div>
+                <div class="card status-card">
+                    <h3>Active Permits</h3>
+                    <div class="count" id="activeCount">5</div>
+                </div>
+                <div class="card status-card action-card">
+                    <button id="addNonEmployeeBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Non-Employee
+                    </button>
+                </div>
+                
+            </div>
+            
+            <!-- Non-Employees Table -->
+            <div class="card">
+                <table class="data-table nonemployees-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>NIC</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Permit Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="nonEmployeesTable">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Non-Employee Modal -->
+    <div id="addNonEmployeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Register New Non-Employee</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="nonEmployeeForm">
+                    <div class="form-group">
+                        <label for="nonEmployeeId">ID</label>
+                        <input type="text" id="nonEmployeeId" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="neNic">NIC Number</label>
+                        <input type="text" id="neNic" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="neName">Full Name</label>
+                        <input type="text" id="neName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="neUsername">Username</label>
+                        <input type="text" id="neUsername" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nePassword">Password</label>
+                        <input type="password" id="nePassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nePhone">Phone Number</label>
+                        <input type="tel" id="nePhone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="neEmail">Email</label>
+                        <input type="email" id="neEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="neAddress">Address</label>
+                        <textarea id="neAddress" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="neVehicleNo">Vehicle Number</label>
+                        <input type="text" id="neVehicleNo" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nePermitType">Permit Type</label>
+                        <select id="nePermitType" class="form-control" required>
+                            <option value="">Select Permit Type</option>
+                            <option value="monthly">Monthly ($75.00)</option>
+                            <option value="quarterly">Quarterly ($200.00)</option>
+                            <option value="semiannual">Semi-Annual ($350.00)</option>
+                            <option value="annual">Annual ($650.00)</option>
+                        </select>
+                    </div>
+                </form>
+
+                <!-- QR Code section (initially hidden) -->
+                <div id="nonEmployeeQRCodeSection" style="display: none; margin-top: 20px;">
+                    <h3>Non-Employee QR Code</h3>
+                    <div class="qr-code-container">
+                        <div class="qr-code-img">
+                            <img id="nonEmployeeQRImage" src="" alt="QR Code">
+                        </div>
+                        <div class="qr-code-info">
+                            <p><strong>ID:</strong> <span id="qrNonEmployeeId"></span></p>
+                            <p><strong>Name:</strong> <span id="qrNonEmployeeName"></span></p>
+                            <p><strong>Vehicle No.:</strong> <span id="qrNonEmployeeVehicle"></span></p>
+                            <p><strong>Permit Type:</strong> <span id="qrNonEmployeePermitType"></span></p>
+                            <p><strong>Valid Until:</strong> <span id="qrNonEmployeeValidUntil"></span></p>
+                        </div>
+                    </div>
+                    <div class="qr-code-instructions">
+                        <p><i class="fas fa-info-circle"></i> This QR code can be used for quick identification at parking entries and exits.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal" id="cancelNonEmployeeBtn">Cancel</button>
+                <button class="btn btn-primary" id="submitNonEmployeeBtn">Register Non-Employee</button>
+                <button class="btn btn-primary" id="printNonEmployeeQRBtn" style="display: none;">
+                    <i class="fas fa-print"></i> Print QR Code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/admin.js"></script>
+</body>
+</html> 

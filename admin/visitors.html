@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitors - Admin Panel</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Admin Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-id-card"></i> Permit Requests</a></li>
+                <li><a href="employees.html"><i class="fas fa-users"></i> Employees</a></li>
+                <li><a href="nonemployees.html"><i class="fas fa-user"></i> Non-Employees</a></li>
+                <li><a href="violation-management.html"><i class="fas fa-exclamation-triangle"></i> Violations</a></li>
+                <li><a href="visitors.html" class="active"><i class="fas fa-user-friends"></i> Visitors</a></li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li><a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <h1>Visitors</h1>
+            
+            <!-- Status Cards -->
+            <div class="status-cards">
+                <div class="card status-card">
+                    <h3>Today</h3>
+                    <div class="count" id="todayCount">3</div>
+                </div>
+                <div class="card status-card">
+                    <h3>This Week</h3>
+                    <div class="count" id="weekCount">12</div>
+                </div>
+                <div class="card status-card action-card">
+                    <button id="addVisitorBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Visitor
+                    </button>
+                </div>
+                
+            </div>
+            
+            <!-- Visitors Table -->
+            <div class="card">
+                <table class="data-table visitors-table">
+                    <thead>
+                        <tr>
+                            <th>Visitor ID</th>
+                            <th>Name</th>
+                            <th>NIC</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Purpose</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitorsTable">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Visitor Modal -->
+    <div id="addVisitorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Register New Visitor</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="visitorForm">
+                    <div class="form-group">
+                        <label for="visitorId">Visitor ID</label>
+                        <input type="text" id="visitorId" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="nic">NIC Number</label>
+                        <input type="text" id="nic" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitorName">Full Name</label>
+                        <input type="text" id="visitorName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="purpose">Purpose of Visit</label>
+                        <input type="text" id="purpose" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleNo">Vehicle Number (Optional)</label>
+                        <input type="text" id="vehicleNo" class="form-control">
+                    </div>
+                </form>
+
+                <!-- QR Code section (initially hidden) -->
+                <div id="visitorQRCodeSection" style="display: none; margin-top: 20px;">
+                    <h3>Visitor QR Code</h3>
+                    <div class="qr-code-container">
+                        <div class="qr-code-img">
+                            <img id="visitorQRImage" src="" alt="QR Code">
+                        </div>
+                        <div class="qr-code-info">
+                            <p><strong>ID:</strong> <span id="qrVisitorId"></span></p>
+                            <p><strong>Name:</strong> <span id="qrVisitorName"></span></p>
+                            <p><strong>Purpose:</strong> <span id="qrVisitorPurpose"></span></p>
+                            <p><strong>Vehicle No.:</strong> <span id="qrVisitorVehicle"></span></p>
+                        </div>
+                    </div>
+                    <div class="qr-code-instructions">
+                        <p><i class="fas fa-info-circle"></i> This QR code can be used for quick identification at parking entries and exits.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal" id="cancelVisitorBtn">Cancel</button>
+                <button class="btn btn-primary" id="submitVisitorBtn">Register Visitor</button>
+                <button class="btn btn-primary" id="printVisitorQRBtn" style="display: none;">
+                    <i class="fas fa-print"></i> Print QR Code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/admin.js"></script>
+</body>
+</html> 

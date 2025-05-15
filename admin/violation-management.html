@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Violations - Admin Panel</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Admin Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-id-card"></i> Permit Requests</a></li>
+                <li><a href="employees.html"><i class="fas fa-users"></i> Employees</a></li>
+                <li><a href="nonemployees.html"><i class="fas fa-user"></i> Non-Employees</a></li>
+                <li><a href="violation-management.html" class="active"><i class="fas fa-exclamation-triangle"></i> Violations</a></li>
+                <li><a href="visitors.html"><i class="fas fa-user-friends"></i> Visitors</a></li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li><a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <h1>Violations</h1>
+            
+            <!-- Status Cards -->
+            <div class="status-cards">
+                <div class="card status-card">
+                    <h3>New</h3>
+                    <div class="count" id="newCount">2</div>
+                </div>
+                <div class="card status-card">
+                    <h3>Resolved</h3>
+                    <div class="count" id="resolvedCount">5</div>
+                </div>
+                <div class="card status-card action-card">
+                    <button id="createViolationBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Violation
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Violations Table -->
+            <div class="card">
+                <table class="data-table violation-table">
+                    <thead>
+                        <tr>
+                            <th>Violation ID</th>
+                            <th>Vehicle No.</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Fine Amount</th>
+                            <th>Owner Type</th>
+                            <th>User ID</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="violationsTable">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/admin.js"></script>
+</body>
+</html> 
