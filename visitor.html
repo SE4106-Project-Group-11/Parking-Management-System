@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Dashboard - Parking Management System</title>
+    <link rel="stylesheet" href="nonEmployee.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-parking"></i>
+                <span>Visitor Panel</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-tab="permits">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>My Permits</span>
+                </li>
+                <li data-tab="violations">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>My Violations</span>
+                </li>
+                <li id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="content visitorBg">
+            <!-- Permits Section -->
+            <section id="permits" class="tab-content active">
+                <div class="header">
+                    <h2>My Parking Permits</h2>
+                    <button class="add-btn" id="requestPermitBtn">
+                        <i class="fas fa-plus"></i> Request New Permit
+                    </button>
+                </div>
+                <div class="permit-status-card">
+                    <div class="permit-info">
+                        <h3>Current Permit Status</h3>
+                        <div id="currentPermitStatus">
+                            <span class="status-badge status-none">No Active Permit</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <h3>Permit History</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Request Date</th>
+                                <th>Vehicle No.</th>
+                                <th>Status</th>
+                                <th>Valid Until</th>
+                            </tr>
+                        </thead>
+                        <tbody id="permitTableBody">
+                            <!-- Permit history will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Violations Section -->
+            <section id="violations" class="tab-content">
+                <div class="header">
+                    <h2>My Violations</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <h3>Pending Fines</h3>
+                            <p id="pendingFines">$0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Vehicle No.</th>
+                                <th>Violation Type</th>
+                                <th>Fine Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="violationTableBody">
+                            <!-- Violations will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Requesting Permit -->
+    <div id="permitModal" class="modal">
+        <div class="modal-content">
+            <h2>Request Parking Permit</h2>
+            <form id="permitForm">
+                <div class="form-group">
+                    <input type="text" id="vehicleNumber" placeholder="Vehicle Number" required>
+                </div>
+                <div class="form-group">
+                    <select id="vehicleType" required>
+                        <option value="">Select Vehicle Type</option>
+                        <option value="Car">Car</option>
+                        <option value="Motorcycle">Motorcycle</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit">Submit Request</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="nonEmployee.js"></script>
+</body>
+</html>
