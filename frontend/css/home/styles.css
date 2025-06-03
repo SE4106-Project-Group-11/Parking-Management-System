@@ -206,3 +206,47 @@
     font-size: 72px;
     font-weight: 700;
   }
+
+      /*                                            About Us                                              */
+
+
+.about-us {
+  display: flex;
+  align-items: center;
+  background-color: hsla(197, 5%, 30%, 0.341);
+  gap: 100px;
+}
+
+
+.about-us-image{
+  width:50%;
+  height: 80vh;
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+  url(https://arab-security.com/wp-content/uploads/2024/08/parking-1024x1024.png);
+  background-size: cover;
+  background-position: center;
+}
+
+.content-section {
+  width: 40vw;
+  padding: 20em;
+  padding: 25px;
+  text-align: justify;
+  font-family: Open Sans;
+}
+
+.content-section h1 {
+  font-size: 30px;
+  margin-bottom: 20px;
+  color: #25255d;
+  text-align: center;
+}
+
+.content-section p {
+  font-size: 16px;
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+
+
+  
