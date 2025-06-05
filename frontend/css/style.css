@@ -1,0 +1,224 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Background image with overlay */
+.signInOutBg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=800&q=80");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.6);
+  z-index: -2;
+  animation: backgroundZoom 30s ease-in-out infinite alternate;
+}
+@keyframes backgroundZoom {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Form container with glassmorphism + fade/slide animation */
+.form-container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(31, 31, 31, 0.12);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.3s ease;
+  animation: fadeSlideIn 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.form-container.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.form-container:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Headings */
+h2 {
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  font-size: 2rem;
+}
+
+/* Form group spacing */
+.form-group {
+  margin-bottom: 20px;
+}
+
+#userType {
+  background: rgba(
+    255,
+    255,
+    255,
+    0.2
+  ); /* Optional: Adjust background for contrast */
+}
+
+/* Inputs and select with shadows and smooth transitions */
+input,
+select {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.15);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+  letter-spacing: 0.03em;
+}
+input::placeholder,
+select {
+  color: #ffffff;
+}
+input:focus,
+select:focus {
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 8px 3px #7a55ff;
+  color: #ffffff;
+}
+
+/* Buttons with gradient and hover effect */
+button {
+  width: 100%;
+  padding: 14px;
+  background-image: linear-gradient(45deg, #5a9cff, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 15px rgba(86, 109, 255, 0.6);
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 10%,
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  transform: rotate(25deg);
+}
+
+button:hover {
+  box-shadow: 0 10px 20px rgba(121, 78, 255, 0.8);
+  transform: scale(1.05);
+}
+button:hover::before {
+  opacity: 1;
+}
+button:focus {
+  outline: none;
+}
+
+/* Paragraph and links */
+p {
+  text-align: center;
+  margin-top: 20px;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+a {
+  color: #5791fc;
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #43e3ff;
+  text-decoration: underline;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Responsive styles */
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+
+  .form-container {
+    padding: 25px 20px;
+    border-radius: 12px;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+  }
+
+  button {
+    font-size: 16px;
+    padding: 13px;
+  }
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Parking Management System</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body class="signInOutBg">
+    <div class="container">
+      <div
+        class="form-container visible"
+        id="loginContainer"
+        aria-label="Login Form Container"
+      >
+        <h2>Login</h2>
+        <form id="loginForm" aria-label="Login Form">
+          <div class="form-group">
+            <input
+              type="email"
+              id="loginEmail"
+              placeholder="Email"
+              required
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Password"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+          <div class="form-group">
+            <select id="userType" aria-label="Select User Type">
+              <option value="employee">Employee</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button type="submit" aria-label="Login Button">Login</button>
+        </form>
+        <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+      </div>
+
+      
+          <button type="submit" aria-label="Register Button">Register</button>
+        </form>
+        <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+      </div>
+    </div>
+    <div class="signInOutBg"></div>
+    <script src="../js/script.js"></script>
+  </body>
+</html>
