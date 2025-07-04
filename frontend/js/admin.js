@@ -1,143 +1,167 @@
 // Admin Dashboard JavaScript
 
+
+(() => {
+  const API_BASE = '/api/admin';
+  const pageMap = {
+    'employees.html':      { sectionId: 'employeesTable', key: 'employees',    type: 'employee' },
+    'nonemployees.html':   { sectionId: 'nonEmployeesTable', key: 'nonemployees', type: 'nonemployee' },
+    'visitors.html':       { sectionId: 'visitorsTable',    key: 'visitors',     type: 'visitor' },
+  };
+
+  // Determine current page filename
+  const path = window.location.pathname.split('/').pop();
+  const cfg = pageMap[path];
+  if (!cfg) return;  // Not one of the three admin list pages
+
+  // Fetch pending users once DOM is ready
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch(`${API_BASE}/pending`);
+      if (!res.ok) throw new Error('Failed to fetch pending users');
+      const data = await res.json();
+
+      populateTable(data[cfg.key] || []);
+    } catch (e) {
+      console.error(e);
+      alert('Could not load pending users.');
+    }
+  });
+
+  // Build table rows with an Approve button
+  function populateTable(users) {
+    const tbody = document.getElementById(cfg.sectionId);
+    tbody.innerHTML = '';  // clear any placeholder rows
+
+    if (users.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = tbody.closest('table').querySelectorAll('th').length;
+      td.textContent = 'No pending registrations.';
+      td.style.textAlign = 'center';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    users.forEach(u => {
+      const tr = document.createElement('tr');
+
+      // Adjust these columns to match your table headers
+      const cols = {
+        employee:    [u.empID, u.name, /* department or permit type? */ u.permitType, u.email, u.status],
+        nonemployee: [u._id,   u.name, u.nic, u.telNo, u.email, u.status],
+        visitor:     [u._id,   u.name, u.nic, u.telNo, u.email, u.permitType],
+      }[cfg.type];
+
+      cols.forEach(text => {
+        const td = document.createElement('td');
+        td.textContent = text || '';
+        tr.appendChild(td);
+      });
+
+      // Actions column
+      const actionTd = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.textContent = 'Approve';
+      btn.classList.add('btn','btn-sm','btn-primary');
+      btn.addEventListener('click', () => approveUser(u._id, tr));
+      actionTd.appendChild(btn);
+      tr.appendChild(actionTd);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Call backend to approve, then remove row
+  async function approveUser(id, rowEl) {
+    if (!confirm('Approve this user?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/approve/${cfg.type}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error('Approval failed');
+      // Optionally read JSON: const result = await res.json();
+      rowEl.remove();
+      alert('User approved and emailed.');
+    } catch (e) {
+      console.error(e);
+      alert('Error approving user.');
+    }
+  }
+})();
+
+
 document.addEventListener('DOMContentLoaded', function() {
     // Sample data
     const permitRequests = [
         {
-            employeeId: 'EMP001',
-            name: 'John Doe',
-            vehicleNo: 'ABC123',
-            requestDate: '2025-03-14',
-            status: 'rejected'
-        },
-        {
-            employeeId: 'EMP002',
-            name: 'Jane Smith',
-            vehicleNo: 'XYZ789',
-            requestDate: '2025-03-13',
-            status: 'approved'
+            employeeId: '',
+            name: '',
+            vehicleNo: '',
+            requestDate: '',
+            status: ''
         }
     ];
 
     // Sample user data for search functionality
     const users = [
         {
-            id: 'EMP001',
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            department: 'IT Department',
-            vehicleNo: 'ABC123',
-            permitStatus: 'Expired',
-            userType: 'employee'
-        },
-        {
-            id: 'EMP002',
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            department: 'HR Department',
-            vehicleNo: 'XYZ789',
-            permitStatus: 'Active',
-            userType: 'employee'
-        },
-        {
-            id: 'VIS001',
-            name: 'Bob Johnson',
-            email: 'bob.johnson@example.com',
-            department: 'N/A',
-            vehicleNo: 'DEF456',
-            permitStatus: 'Active',
-            userType: 'visitor'
-        },
-        {
-            id: 'NEM001',
-            name: 'Sarah Wilson',
-            email: 'sarah.wilson@example.com',
-            department: 'N/A',
-            vehicleNo: 'GHI789',
-            permitStatus: 'Active',
-            userType: 'nonemployee'
+            id: '',
+            name: '',
+            email: '',
+            department: '',
+            vehicleNo: '',
+            permitStatus: '',
+            userType: ''
         }
     ];
 
     // Sample violations data
     const violations = [
         {
-            id: 'VIO001',
-            vehicleNo: 'ABC123',
-            date: '2025-02-10',
-            violationType: 'Parking in unauthorized area',
-            fineAmount: 50.00,
-            userType: 'employee',
-            userId: 'EMP001'
-        },
-        {
-            id: 'VIO002',
-            vehicleNo: 'DEF456',
-            date: '2025-03-01',
-            violationType: 'Overstayed parking limit',
-            fineAmount: 30.00,
-            userType: 'visitor',
-            userId: 'VIS001'
+            id: '',
+            vehicleNo: '',
+            date: '',
+            violationType: '',
+            fineAmount: 45,
+            userType: '',
+            userId: ''
         }
     ];
 
     // Sample visitors data
     const visitors = [
         {
-            id: 'VIS001',
-            name: 'Bob Johnson',
-            nic: '956123789V',
-            username: 'bob.johnson',
-            password: 'password123',
-            phone: '555-123-4567',
-            email: 'bob.johnson@example.com',
-            address: '123 Main St, Anytown, USA',
-            purpose: 'Business Meeting',
-            vehicleNo: 'DEF456'
-        },
-        {
-            id: 'VIS002',
-            name: 'Alice Brown',
-            nic: '986543210V',
-            username: 'alice.brown',
-            password: 'securepass',
-            phone: '555-987-6543',
-            email: 'alice.brown@example.com',
-            address: '456 Oak Ave, Somewhere, USA',
-            purpose: 'Interview',
-            vehicleNo: 'JKL012'
+            id: '',
+            name: '',
+            nic: '',
+            username: '',
+            password: '',
+            phone: '',
+            email: '',
+            address: '',
+            purpose: '',
+            vehicleNo: ''
         }
     ];
 
     // Sample non-employees data
     const nonEmployees = [
         {
-            id: 'NEM001',
-            name: 'Sarah Wilson',
-            nic: '978654321V',
-            username: 'sarah.wilson',
-            password: 'pass456',
-            phone: '555-567-8901',
-            email: 'sarah.wilson@example.com',
-            address: '789 Pine Rd, Somewhere, USA',
-            vehicleNo: 'GHI789',
-            permitType: 'monthly',
-            permitStatus: 'Active',
-            permitValidUntil: '2025-04-15'
-        },
-        {
-            id: 'NEM002',
-            name: 'Michael Davis',
-            nic: '912345678V',
-            username: 'michael.davis',
-            password: 'securepass123',
-            phone: '555-234-5678',
-            email: 'michael.davis@example.com',
-            address: '101 Maple St, Somewhere, USA',
-            vehicleNo: 'MNO345',
-            permitType: 'quarterly',
-            permitStatus: 'Active',
-            permitValidUntil: '2025-06-20'
+            id: '',
+            name: '',
+            nic: '',
+            username: '',
+            password: '',
+            phone: '',
+            email: '',
+            address: '',
+            vehicleNo: '',
+            permitType: '',
+            permitStatus: '',
+            permitValidUntil: ''
         }
     ];
 
@@ -494,18 +518,59 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+    /*
     // Submit violation
     function submitViolation() {
-        const violationId = document.getElementById('violationId').value;
-        const vehicleNo = document.getElementById('violationVehicleNo').value;
-        const date = document.getElementById('violationDate').value;
-        const violationType = document.getElementById('violationType').value;
-        const fineAmount = parseFloat(document.getElementById('fineAmount').value);
-        const violationMessage = document.getElementById('violationMessage')?.value || '';
-        const userType = document.getElementById('userType').value;
-        const userId = document.getElementById('userId').value;
-        
+    const violationId = document.getElementById('violationId').value;
+    const vehicleNo = document.getElementById('violationVehicleNo').value;
+    const date = document.getElementById('violationDate').value;
+    const violationType = document.getElementById('violationType').value;
+    const fineAmount = parseFloat(document.getElementById('fineAmount').value);
+    const violationMessage = document.getElementById('violationMessage')?.value || '';
+    const userType = document.getElementById('userType').value;
+    const userId = document.getElementById('userId').value;
+
+    if (!vehicleNo || !date || !violationType || isNaN(fineAmount) || !userType || !userId) {
+        showNotification('Please fill all required fields', 'error');
+        return;
+    }
+         // Send to backend
+    fetch("http://localhost:5000/api/violations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            id: violationId,
+            vehicleNo,
+            date,
+            violationType,
+            fineAmount,
+            message: violationMessage,
+            userType,
+            userId
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.violation) {
+            showNotification("Violation created & saved to DB", "success");
+            // Optionally reload data
+            loadViolationsFromBackend();
+        } else {
+            showNotification("Failed to save violation", "error");
+        }
+        // Close modal
+        const modal = document.querySelector(".modal");
+        if (modal) {
+            modal.classList.remove("show");
+            setTimeout(() => (modal.style.display = "none"), 300);
+        }
+    })
+    .catch(error => {
+        console.error(" Error saving violation:", error);
+        showNotification("Server error", "error");
+    });
+}
+
         // Validate form
         if (!vehicleNo || !date || !violationType || isNaN(fineAmount) || !userType || !userId) {
             showNotification('Please fill all required fields', 'error');
@@ -539,10 +604,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }
         
+        
         // Update violations table if it exists
         updateViolationsTable();
     }
-    
+    */
     // Update violations table
     function updateViolationsTable() {
         const violationsTable = document.getElementById('violationsTable');
@@ -1681,13 +1747,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     let validUntil = new Date();
                     
                     switch(permitType) {
-                        case 'monthly':
+                        case 'day':
                             validUntil.setMonth(validUntil.getMonth() + 1);
                             break;
-                        case 'quarterly':
+                        case 'week':
                             validUntil.setMonth(validUntil.getMonth() + 3);
                             break;
-                        case 'semiannual':
+                        case 'month':
                             validUntil.setMonth(validUntil.getMonth() + 6);
                             break;
                         case 'annual':

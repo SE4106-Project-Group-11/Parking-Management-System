@@ -1,33 +1,53 @@
-// Main JavaScript file for Parking Management System
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  if (!loginForm) {
+    console.error('Login form not found');
+    return;
+  }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle login form
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const userType = document.getElementById('userType').value;
-            
-            // TODO: Add your login logic here
-            // For now, just redirect based on user type
-            switch(userType) {
-                case 'admin':
-                    window.location.href = 'admin/dashboard.html';
-                    break;
-                case 'employee':
-                    window.location.href = 'employee/dashboard.html';
-                    break;
-                case 'visitor':
-                    window.location.href = 'visitor/dashboard.html';
-                    break;
-                case 'nonemployee':
-                    window.location.href = 'nonemployee/dashboard.html';
-                    break;
-            }
-        });
+  loginForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const userType = document.getElementById('userType').value;
+
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, userType })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('Login successful!');
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userRole', data.user.role);
+        localStorage.setItem('userName', data.user.name);
+
+       if (data.user.role === 'admin') {
+        window.location.href = 'pages/admin/dashboard.html';
+      } else if (data.user.role === 'employee') {
+        window.location.href = 'pages/employee/dashboard.html';
+      } else if (data.user.role === 'visitor') {
+        window.location.href = 'pages/visitor/dashboard.html';
+      } else if (data.user.role === 'nonemployee') {
+        window.location.href = 'pages/nonemployee/dashboard.html';
+      } else {
+        alert('Unknown user role. Cannot redirect.');
+      }
+
+      } else {
+        alert(data.message || 'Login failed.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred during login.');
     }
+  });
+});
 
     // Sidebar toggle for mobile
     const sidebarToggleBtn = document.getElementById('sidebarToggle');
@@ -365,26 +385,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Dynamic Violations Table Rendering (for all dashboards)
     const violationsData = [
         {
-            date: '2025-02-10',
-            vehicle: 'ABC123',
-            description: 'Parked in unauthorized area',
-            fine: 50.00,
-            status: 'pending'
-        },
-        {
-            date: '2025-03-15',
-            vehicle: 'XYZ789',
-            description: 'Improper parking',
-            fine: 20.00,
-            status: 'pending'
-        },
-        {
-            date: '2025-02-10',
-            vehicle: 'DEF456',
-            description: 'Overstayed parking duration',
-            fine: 30.00,
-            status: 'pending'
+            date: '',
+            vehicle: '',
+            description: '',
+            fine: 5.00,
+            status: ''
         }
+       
     ];
 
     function renderViolationsTable(tableSelector, data) {
@@ -510,15 +517,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Public parking link handling
+    document.addEventListener('DOMContentLoaded', function () {
     const publicParkingLink = document.getElementById('publicParkingLink');
     if (publicParkingLink) {
         publicParkingLink.addEventListener('click', function(e) {
             e.preventDefault();
-            // TODO: Add your public parking page logic here
-            alert('Public parking feature coming soon!');
+            window.location.href = '../Home.html';
+         
+        
         });
     }
 });
+
+
+
 
 // Utility function to format date
 function formatDate(dateString) {
@@ -547,10 +559,10 @@ function fetchPermits(userId) {
         setTimeout(() => {
             resolve([
                 {
-                    id: 'P123456',
+                    id: '',
                     vehicle: 'ABC123',
                     type: 'Car',
-                    validUntil: '2026-03-14',
+                    validUntil: '',
                     status: 'active'
                 }
             ]);

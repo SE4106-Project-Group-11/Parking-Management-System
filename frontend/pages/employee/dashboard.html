@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Panel - Parking Management System</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/employee.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/employee.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -32,8 +32,14 @@
                         <i class="fas fa-qrcode"></i> My QR Code
                     </a>
                 </li>
+
                 <li>
-                    <a href="#" class="logout-btn">
+                    <a href="payment-management.html">
+                        <i class="fas fa-money-bill-wave"></i> Payments
+                    </a>
+                </li>
+                <li>
+                    <a href="../../index.html" class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </li>
@@ -50,7 +56,7 @@
             <div class="top-bar">
                 <h1>My Parking Permits</h1>
                 <div class="user-info">
-                    <span>John Doe</span>
+                    <span>Viyash</span>
                     <button class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
@@ -79,39 +85,7 @@
                 </div>
             </div>
 
-            <!-- Violations Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>Violations</h2>
-                </div>
-                <div class="card-body">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Vehicle No.</th>
-                                <th>Violation</th>
-                                <th>Fine Amount</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2025-02-10</td>
-                                <td>ABC123</td>
-                                <td>Parked in unauthorized area</td>
-                                <td>$50.00</td>
-                                <td><span class="status-badge status-pending">Pending</span></td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm">Pay Fine</button>
-                                    <button class="btn btn-secondary btn-sm">Dispute</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        
         </main>
     </div>
 
@@ -203,6 +177,18 @@
         </div>
     </div>
 
-    <script src="../js/script.js"></script>
+    <script src="../../js/script.js"></script>
+    
+
+    <script>
+        const role = localStorage.getItem('userRole');
+        const allowedRole = 'employee'; 
+
+        if (role !== allowedRole) {
+            alert('Access denied.');
+            window.location.href = 'index.html';
+        }
+    </script>
+
 </body>
 </html>
