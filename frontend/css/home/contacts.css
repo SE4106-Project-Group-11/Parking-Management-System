@@ -8,7 +8,7 @@
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
-    color: #374151;
+    color: #6e9fc0;
     background-color: #f8fafc;
 }
 
@@ -20,7 +20,7 @@ body {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    background: linear-gradient(135deg, #34495e 0%, #6e9fc0 100%);
     color: white;
     padding: 80px 0;
     text-align: center;
@@ -70,4 +70,91 @@ body {
     margin: 0 auto;
     opacity: 0.9;
     line-height: 1.7;
+}
+
+
+/* Contact Cards */
+.contact-cards {
+    padding: 80px 0;
+    margin-top: -40px;
+    position: relative;
+    z-index: 10;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.contact-card {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+}
+
+.card-icon.general {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.card-icon.emergency {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.card-icon.location {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.card-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    color: #4b5563;
+}
+
+.contact-item svg {
+    margin-right: 12px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.contact-item span {
+    font-weight: 500;
+}
+
+.card-content p {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-top: 15px;
 }
