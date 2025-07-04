@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Violations - Parking Management System</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Employee Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+             <li>
+              <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> My Permits </a>
+            </li>
+                <li>
+                    <a href="violations.html" class="active"><i class="fas fa-exclamation-triangle"></i> My Violations </a>
+                </li>
+                <li>
+                    <a href="qrcode.html"> <i class="fas fa-qrcode"></i> My QR Code </a>
+                </li>
+                <li><a href="payment-management.html" class="active"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li>
+                    <a href="../../index.html" class="logout-btn"> <i class="fas fa-sign-out-alt"></i> Logout </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>My Violations</h1>
+                <div class="user-info">
+                    <span>John Doe</span>
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Violations Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Violation History</h2>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Vehicle No.</th>
+                                <th>Violation</th>
+                                <th>Fine Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                       
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Pay Violation Modal -->
+    <div id="payViolationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pay Violation Fine</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="violation-details">
+                    <p><strong>Violation ID:</strong> V789012</p>
+                    <p><strong>Date:</strong> 2025-02-10</p>
+                    <p><strong>Description:</strong> Parked in unauthorized area</p>
+                    <p><strong>Fine Amount:</strong> $50.00</p>
+                </div>
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label for="paymentMethod">Payment Method</label>
+                        <select id="paymentMethod" class="form-control" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="creditCard">Credit Card</option>
+                            <option value="debitCard">Debit Card</option>
+                            <option value="bankTransfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div id="cardDetails" style="display: none;">
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number</label>
+                            <input type="text" id="cardNumber" class="form-control" placeholder="XXXX XXXX XXXX XXXX">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date</label>
+                                <input type="text" id="expiryDate" class="form-control" placeholder="MM/YY">
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" class="form-control" placeholder="XXX">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button class="btn btn-primary" id="confirmPayment">Confirm Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dispute Violation Modal -->
+    <div id="disputeViolationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Dispute Violation</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="violation-details">
+                    <p><strong>Violation ID:</strong> V789012</p>
+                    <p><strong>Date:</strong> 2025-02-10</p>
+                    <p><strong>Description:</strong> Parked in unauthorized area</p>
+                    <p><strong>Fine Amount:</strong> $50.00</p>
+                </div>
+                <form id="disputeForm">
+                    <div class="form-group">
+                        <label for="disputeReason">Reason for Dispute</label>
+                        <select id="disputeReason" class="form-control" required>
+                            <option value="">Select Reason</option>
+                            <option value="incorrectVehicle">Incorrect Vehicle Information</option>
+                            <option value="permissionGranted">Had Permission to Park</option>
+                            <option value="emergencySituation">Emergency Situation</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="disputeExplanation">Detailed Explanation</label>
+                        <textarea id="disputeExplanation" class="form-control" rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="evidenceUpload">Upload Evidence (optional)</label>
+                        <input type="file" id="evidenceUpload" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button class="btn btn-primary" id="submitDispute">Submit Dispute</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/script.js"></script>
+</body>
+</html> 

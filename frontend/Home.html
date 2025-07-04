@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parking Management System</title>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">  
+  <link rel="stylesheet" href="css/Home.css" />
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="blue-bar"></div>
+      </div> 
+    </aside>
+
+    <main id="main" class="main-content">
+      <header class="navbar">
+        <ul>
+          <li><a href="#main">HOME</a></li>
+          <li><a href="#about-us">ABOUT US</a></li>
+          <li><a href="#features">FEATURES</a></li>
+          <li><a href="#how">HOW IT WORKS</a></li>
+        </ul>
+        <div id="button-line"> 
+          <div class="main-buttons"><a href="register.html">Register</a></div>
+          <div class="main-buttons"><a href="index.html">Log In</a></div> 
+        </div>
+      </header>
+
+      <section class="word-container">
+        <div class="text reveal">
+          <h1>
+            EFFORTLESS<br>
+            OFFICE<br>
+            PARKING<br>
+            STARTS<br>
+            HERE
+          </h1>
+          <p class="slogan">Manage permits, find spots, and avoid violations with ease.</p>
+          <button class="btn reveal">Request Parking Permit</button>
+        </div>
+
+        <div class="flipping-card reveal">
+          <div class="card-container">
+            <div class="card front-face">
+              <h1>Real Time Parking Availability</h1>
+            </div>
+            <div class="card back-face">
+              <h2>Available Parking Spaces</h2>
+              <h1>20</h1>
+              <p>Last Updated: Just Now</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!--   About Us  -->
+     <div id="about-us" class="about-us">
+    <div class="about-us-image">
+    </div>    
+    <div class="content-section">
+      <h1 class="reveal">About us</h1>
+      <p class="reveal">
+        Welcome to the Vehicle Parking Management System – a smart, secure, and user-friendly solution developed to revolutionize 
+        how parking is handled in modern institutions and workplaces. Designed by a team of passionate software engineering undergraduates 
+        from the Faculty of Computing, Sabaragamuwa University of Sri Lanka, our system addresses the daily challenges of parking allocation, 
+        permit issuance, and violation enforcement.
+
+        Through real-time space monitoring, QR-based permits, and streamlined digital access for employees, visitors, and non-employees, 
+        we aim to reduce congestion, boost operational efficiency, and enhance overall parking experiences. Our mission is to deliver a seamless, 
+        paperless, and transparent parking ecosystem that benefits both administrators and users alike.
+      </p>
+    </div>
+  </div>
+
+  <!-- System Features -->
+  <section id="features" class="features-container">
+    <div class="triangle1"></div>
+    <div class="feature-list">
+      <h1 class="reveal">Features We Provide</h1>
+      <ul>
+        <li class="reveal"><span><i class='bx bxs-lock'></i> Employee registration and secure login system</span></li>
+        <li class="reveal"><span><i class='bx bx-qr-scan' ></i> Apply for digital parking permits with QR codes</span></li>
+        <li class="reveal"><span><i class='bx bxs-registered' ></i> Admin-assisted visitor and non-employee registration</span></li>
+        <li class="reveal"><span><i class='bx bxs-car' ></i> Real-time parking space availability tracking</span></li>
+        <li class="reveal"><span><i class='bx bxs-error' ></i> Parking violation notifications and fine enforcement</span></li>
+        <li class="reveal"><span><i class='bx bxs-credit-card' ></i> Online rent and fine payments for non-employees</span></li>
+        <li class="reveal"><span><i class='bx bxs-dashboard' ></i> Admin dashboard with live activity and reports</span></li>
+      </ul>
+      <div class="triangle2"></div>
+    </div>
+  </section>
+
+  <!--  How It Works -->
+   <section id="how" class="how">
+  <h1 class="reveal">How It Works</h1>
+  <div class="steps reveal">
+    <div class="step-container">
+      <div class="small-triangle small-triangle-1"></div>
+      <div class="step">
+        <div class="step-title">01</div>
+        <p>Register as an employee or via admin (for visitors)</p>
+      </div>
+    </div>
+    <div class="step-container">
+      <div class="small-triangle small-triangle-2"></div>
+      <div class="step">
+        <div class="step-title">02</div>
+        <p>Apply for a parking permit and receive a QR code</p>
+      </div>
+    </div>
+    <div class="step-container">
+      <div class="small-triangle small-triangle-3"></div>
+      <div class="step">
+        <div class="step-title">03</div>
+        <p>Check parking availability and park responsibly</p>
+      </div>
+    </div>
+    <div class="step-container">
+      <div class="small-triangle small-triangle-4"></div>
+      <div class="step">
+        <div class="step-title">04</div>
+        <p>Receive alerts and pay fines if needed</p>
+      </div>
+    </div>
+  </div>
+
+   <!-- Footer Section -->
+  <footer>
+    <div class="footer-container">
+      <p>© 2025 ParkingSys. All rights reserved.</p>
+      <nav class="footer-nav">
+        <a href="#">Contact</a> |
+        <a href="#">Privacy Policy</a> |
+        <a href="#">Terms of Service</a>
+      </nav>
+    </div>
+  </footer>
+</section>
+
+<script src="js/Home.js"></script>
+</body>
+</html>

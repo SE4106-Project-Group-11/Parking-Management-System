@@ -1,0 +1,263 @@
+/* Dashboard CSS for Parking Management System */
+
+/* Search Card */
+.search-card {
+    margin-bottom: 1.5rem;
+}
+
+.search-container {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.search-form {
+    display: flex;
+    gap: 1rem;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Status Card with Action Button */
+.status-card.action-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f5f5;
+}
+
+.status-card.action-card button {
+    width: 100%;
+    margin: 0;
+}
+
+/* Search Results */
+#searchResults {
+    margin-bottom: 1.5rem;
+}
+
+#searchResults .card {
+    margin: 0;
+}
+
+#searchResults h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+/* Violation Form Styling */
+#violationForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.form-control {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* User Details Styling */
+.user-details, .violation-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Modal Sizing */
+.modal-content {
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Modal Body Scrolling */
+.modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+}
+
+/* Ensure the modal content fits properly */
+.modal-header, .modal-footer {
+    flex-shrink: 0;
+}
+
+.modal-body {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Form container inside modal body */
+#violationForm, #visitorForm, #nonEmployeeForm {
+    padding-bottom: 15px;
+}
+
+/* Force modal to center properly */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow-y: auto;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.modal.show {
+    display: flex !important;
+    opacity: 1;
+}
+
+/* Form error styles */
+.form-control.error {
+    border-color: #ff0000;
+    background-color: #fff0f0;
+}
+
+.error-message {
+    color: #ff0000;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .search-form {
+        flex-direction: column;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+    
+    .status-cards {
+        flex-direction: column;
+    }
+    
+    .modal-content {
+        width: 90%;
+    }
+}
+
+/* QR Code Styling */
+.qr-code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    gap: 1.5rem;
+}
+
+.qr-code-img {
+    text-align: center;
+    padding: 1rem;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.qr-code-img img {
+    max-width: 100%;
+    height: auto;
+}
+
+.qr-code-info {
+    width: 100%;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.qr-code-instructions {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: #f0f8ff;
+    border-left: 3px solid var(--primary-color);
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    .qr-code-container {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .qr-code-img {
+        flex: 0 0 auto;
+    }
+    
+    .qr-code-info {
+        flex: 1 1 auto;
+    }
+}
+
+/* Bulk QR Code Styling */
+.bulk-qr-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.bulk-qr-item {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bulk-qr-instructions {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #f0f8ff;
+    border-left: 3px solid var(--primary-color);
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+.qr-code-info-compact {
+    width: 100%;
+    font-size: 12px;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.qr-code-info-compact p {
+    margin: 0.25rem 0;
+} 

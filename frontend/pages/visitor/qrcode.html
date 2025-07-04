@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My QR Code - Visitor Panel</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/visitor.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Visitor Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i> My Pass
+                    </a>
+                </li>
+                <li>
+                    <a href="violations.html">
+                        <i class="fas fa-exclamation-triangle"></i> My Violations
+                    </a>
+                </li>
+                <li>
+                    <a href="qrcode.html" class="active">
+                        <i class="fas fa-qrcode"></i> My QR Code
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>My QR Code</h1>
+                <div class="user-info">
+                    <span>Sarah Johnson</span>
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- QR Code Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Visitor Parking Pass QR Code</h2>
+                </div>
+                <div class="card-body">
+                    <div class="user-qrcode-container">
+                        <div class="user-qrcode-image">
+                            <img id="qrCodeImage" 
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=VIS001-Sarah_Johnson-visitor-GHI789-Meeting" 
+                                alt="QR Code"
+                                data-user-id="VIS001"
+                                data-user-name="Sarah Johnson"
+                                data-user-type="visitor"
+                                data-vehicle="GHI789"
+                                data-purpose="Meeting">
+                        </div>
+                        <div class="user-qrcode-info">
+                            <p><strong>Visitor ID:</strong> VIS001</p>
+                            <p><strong>Name:</strong> Sarah Johnson</p>
+                            <p><strong>Purpose:</strong> Meeting</p>
+                            <p><strong>Vehicle:</strong> GHI789</p>
+                            <p><strong>Valid Until:</strong> September 15, 2025 5:00 PM</p>
+                            <p><strong>Status:</strong> <span class="status-badge status-active">Active</span></p>
+                            <div class="user-qrcode-actions">
+                                <button class="btn btn-primary" id="printQRCode">
+                                    <i class="fas fa-print"></i> Print QR Code
+                                </button>
+                                <button class="btn btn-secondary" id="downloadQRCode">
+                                    <i class="fas fa-download"></i> Download QR Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="qrcode-instructions">
+                        <h3><i class="fas fa-info-circle"></i> How to use your QR Code</h3>
+                        <ul>
+                            <li>Present this QR code at the parking facility entrance and exit.</li>
+                            <li>Ensure your phone brightness is set to maximum when displaying the QR code.</li>
+                            <li>You can also print this QR code and keep it in your vehicle.</li>
+                            <li>This QR code is valid only for the duration of your visit.</li>
+                            <li>For extended visits, please contact the reception desk.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../js/script.js"></script>
+    <script src="../../js/qrcode.js"></script>
+</body>
+</html> 
