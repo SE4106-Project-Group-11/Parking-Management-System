@@ -1,133 +1,59 @@
 const express = require('express');
-const mongoose = require('mongoose');
+
 const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const path = require('path');
+const path = require('path');           // for serving frontend
 require('dotenv').config();
+const connectDB = require('./utils/db');
+const authRoutes = require('./routes/auth');
+const paymentRoutes = require('./routes/payment');
+const permitRoutes = require('./routes/permit');
+const adminRoutes = require('./routes/admin');
+
+// Models for initial setup
+const Admin = require('./models/Admin');
+const bcrypt = require('bcryptjs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
-// Import routes
-const authRoutes = require('./routes/authRoutes');
+// Connect DB
+connectDB();
 
 // Middleware
-app.use(helmet());
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// Serve static files from frontend directory
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
-
-app.use(limiter);
-
-// MongoDB Connection
-
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✅ MongoDB connected successfully');
-    console.log('🔍 Connected to database:', mongoose.connection.db.databaseName);
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
-  }
-};
-
-// Create default admin user
-const createDefaultAdmin = async () => {
-  try {
-    const User = require('./models/User');
-    const bcrypt = require('bcryptjs');
-    
-    const adminExists = await User.findOne({ email: 'admin@parking.com' });
-    if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('password', 12);
-      await User.create({
-        fullName: 'Admin User',
-        email: 'admin@parking.com',
-        password: hashedPassword,
-        employeeId: 'ADMIN001',
-        userType: 'admin'
-      });
-      console.log('✅ Default admin user created');
-    }
-  } catch (error) {
-    console.error('Error creating default admin:', error);
-  }
-};
-
-// Connect to database
-connectDB();
+// Log warning if SMTP not configured
+if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+  console.warn('SMTP settings missing! Approval emails will fail.');
+}
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/permits', permitRoutes);
+app.use('/api/admin', adminRoutes);
 
-// Serve frontend pages
+// Route SPA entrypoints
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'pages', 'index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/register.html'));
+});
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
-app.get('/admin.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'pages', 'admin', 'admin.html'));
-});
+// Create default admin if none exists
+const initAdmin = async () => {
+  if (!(await Admin.findOne({ email: 'admin@gmail.com' }))) {
+    const hashed = await bcrypt.hash('admin123', 10);
+    await Admin.create({ name: 'Default Admin', email: 'admin@gmail.com', password: hashed });
+    console.log('Default admin created');
+  }
+};
+initAdmin();
 
-app.get('/employee.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'pages', 'employee', 'employee.html'));
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-app.get('/home.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'pages', 'home', 'home.html'));
-});
-
-app.get('/nonEmployee.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'pages', 'nonEmployee', 'nonEmployee.html'));
-});
-
-app.get('/visitors.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'pages', 'visitors', 'visitors.html'));
-});
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
-  });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Something went wrong!'
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🌐 Frontend: http://localhost:${PORT}`);
-});
-
-module.exports = app;

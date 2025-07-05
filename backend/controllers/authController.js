@@ -1,221 +1,201 @@
-const bcrypt = require('bcryptjs');
+
 const jwt = require('jsonwebtoken');
-const { validationResult } = require('express-validator');
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const { JWT_SECRET } = process.env;
+const Admin = require('../models/Admin');
+const Employee = require('../models/Employee');
+const Visitor = require('../models/Visitor');
+const NonEmployee = require('../models/NonEmployee');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
-// Generate JWT token
-const generateToken = (user) => {
-  return jwt.sign(
-    { 
-      id: user._id, 
-      email: user.email, 
-      userType: user.userType,
-      employeeId: user.employeeId 
-    },
-    JWT_SECRET,
-    { expiresIn: '24h' }
-  );
-};
-
-// Register Controller
-const register = async (req, res) => {
+/*
+exports.register = async (req, res) => {
   try {
-    console.log('📝 Registration attempt:', req.body);
+    const { userType, empID,  name, email, nic, telNo, address, vehicleNo, password,permitType,vehicleType } = req.body;
 
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
-
-    const { fullName, email, password, employeeId } = req.body;
-
-    // Check if user already exists (using standard Mongoose methods)
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: 'User with this email already exists'
-      });
-    }
-
-    // Check if employee ID already exists
-    const existingEmployeeId = await User.findOne({ employeeId: employeeId.trim() });
-    if (existingEmployeeId) {
-      return res.status(409).json({
-        success: false,
-        message: 'Employee ID already exists'
-      });
-    }
-
-    // Hash password
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create new user (using standard Mongoose create method)
-    const userData = {
-      fullName: fullName.trim(),
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      employeeId: employeeId.trim(),
-      userType: 'employee' // Default to employee
-    };
-
-    console.log('👤 Creating user with data:', { ...userData, password: '[HIDDEN]' });
-
-    const newUser = await User.create(userData);
-    console.log('✅ User saved to database:', newUser._id);
-
-    // Generate token
-    const token = generateToken(newUser);
-
-    res.status(201).json({
-      success: true,
-      message: 'Registration successful',
-      data: {
-        user: {
-          id: newUser._id,
-          fullName: newUser.fullName,
-          email: newUser.email,
-          employeeId: newUser.employeeId,
-          userType: newUser.userType
-        },
-        token
+    const hashedPassword = await bcrypt.hash(password, 10);
+   
+    if (userType === 'employee') {
+      if (await Employee.findOne({ email }) || await Employee.findOne({ empID })) {
+        return res.status(400).json({ message: 'Employee email or ID already exists' });
       }
-    });
+      const employee = new Employee({
+        empID,
+        name,
+        email,
+        nic,
+        vehicleNo,
+        vehicleType,
+        permitType,        
+        telNo,
+        address,
+        password: hashedPassword
+      });
+      await employee.save();
+      return res.status(201).json({ message: 'Employee registered successfully' });
+    }
 
-  } catch (error) {
-    console.error('❌ Registration error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error during registration',
-      error: error.message
-    });
+    if (userType === 'visitor') {
+      if (await Visitor.findOne({ email })) {
+        return res.status(400).json({ message: 'Visitor email already exists' });
+      }
+      const visitor = new Visitor({
+        name,
+        email,
+        nic,
+        vehicleNo,
+        vehicleType,
+        permitType,        
+        telNo,
+        address,
+        password: hashedPassword
+      });
+      await visitor.save();
+      return res.status(201).json({ message: 'Visitor registered successfully' });
+    }
+
+    if (userType === 'nonemployee') {
+      if (await NonEmployee.findOne({ email })) {
+        return res.status(400).json({ message: 'Non-Employee email already exists' });
+      }
+      const nonEmployee = new NonEmployee({
+       name,
+        email,
+        nic,
+        vehicleNo,
+        vehicleType,
+        permitType,        
+        telNo,
+        address,
+        password: hashedPassword
+      });
+      await nonEmployee.save();
+      return res.status(201).json({ message: 'Non-Employee registered successfully' });
+    }
+
+    return res.status(400).json({ message: 'Invalid user type' });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Error registering user', error: err.message });
   }
 };
 
-// Login Controller
-const login = async (req, res) => {
+
+exports.login = async (req, res) => {
   try {
-    console.log('🔐 Login attempt:', { email: req.body.email, userType: req.body.userType });
-
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
-
     const { email, password, userType } = req.body;
 
-    // Find user by email (using standard Mongoose method)
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
+    let userModel;
+    if (userType === 'admin') userModel = Admin;
+    else if (userType === 'employee') userModel = Employee;
+    else if (userType === 'visitor') userModel = Visitor;
+    else if (userType === 'nonemployee') userModel = NonEmployee;
+    else return res.status(400).json({ message: 'Invalid user type' });
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
+    const user = await userModel.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Check user type matches
-    if (user.userType !== userType) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Invalid user type.'
-      });
-    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-    // Generate token
-    const token = generateToken(user);
+    const token = jwt.sign(
+      { userId: user._id, role: userType },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    console.log('✅ Login successful for user:', user._id);
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          employeeId: user.employeeId,
-          userType: user.userType
-        },
-        token,
-        redirectTo: user.userType === 'admin' ? '/admin.html' : '/employee.html'
+    res.status(200).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: userType
       }
     });
 
-  } catch (error) {
-    console.error('❌ Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error during login'
-    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Login error', error: err.message });
   }
 };
 
-// Get current user
-const getCurrentUser = async (req, res) => {
+*/
+
+
+
+exports.register = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
+    const { userType, empID, name, email, nic, telNo, address, vehicleNo, password, permitType } = req.body;
+    const hashed = await bcrypt.hash(password, 10);
+    let model;
+    if (userType === 'employee') model = Employee;
+    else if (userType === 'nonemployee') model = NonEmployee;
+    else if (userType === 'visitor') model = Visitor;
+    else return res.status(400).json({ message: 'Invalid user type' });
 
-    res.json({
-      success: true,
-      data: {
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          employeeId: user.employeeId,
-          userType: user.userType
-        }
-      }
-    });
-  } catch (error) {
-    console.error('Get current user error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    // Unique checks
+    if (await model.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
+    if (userType === 'employee' && await model.findOne({ empID })) return res.status(400).json({ message: 'Employee ID exists' });
+
+    const user = await model.create({ empID, name, email, nic, telNo, address, vehicleNo, password: hashed, permitType });
+    res.status(201).json({ message: 'Registered, pending approval', userId: user._id });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
-// Logout
-const logout = (req, res) => {
-  res.json({
-    success: true,
-    message: 'Logout successful'
-  });
+exports.login = async (req, res) => {
+  try {
+    // pull userType (not role) from the body
+    const { email, password, userType } = req.body;
+
+    // pick the right model based on userType
+    let Model;
+    switch (userType) {
+      case 'admin':
+        Model = Admin; break;
+      case 'employee':
+        Model = Employee; break;
+      case 'nonemployee':
+        Model = NonEmployee; break;
+      case 'visitor':
+        Model = Visitor; break;
+      default:
+        return res.status(400).json({ message: 'Invalid user type' });
+    }
+
+    // lookup
+    const user = await Model.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // only non-admins need approval
+    if (userType !== 'admin' && user.status !== 'approved') {
+      return res.status(403).json({ message: 'Account not approved yet' });
+    }
+
+    // check password
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // issue JWT with the userType inside
+    const token = jwt.sign(
+      { id: user._id, role: userType },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: userType }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
-module.exports = {
-  register,
-  login,
-  getCurrentUser,
-  logout
-};
+
