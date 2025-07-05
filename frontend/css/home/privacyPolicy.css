@@ -164,3 +164,44 @@ body {
 .info-list li {
     margin-bottom: 0.25rem;
 }
+
+/* Usage Grid */
+.usage-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .usage-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.usage-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.usage-item {
+    border-left: 4px solid #2563eb;
+    padding-left: 1rem;
+}
+
+.usage-title { 
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.usage-list {
+    list-style: none;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.usage-list li {
+    margin-bottom: 0.25rem;
+}
+
