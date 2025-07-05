@@ -163,6 +163,44 @@
             </div>
         </div>
     </div>
+<script>
+  function loadEmployeeViolations(userId) {
+    fetch(`http://localhost:5000/api/violations/user/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        populateViolationsTable(data);
+      });
+  }
+
+  function populateViolationsTable(violations) {
+    const table = document.querySelector(".data-table tbody");
+    table.innerHTML = '';
+
+    violations.forEach(v => {
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td>${new Date(v.date).toLocaleDateString()}</td>
+        <td>${v.vehicleNumber || 'N/A'}</td>
+        <td>${v.description}</td>
+        <td>$${v.fineAmount.toFixed(2)}</td>
+        <td>${v.status}</td>
+        <td>
+          <button class="btn btn-primary" onclick="openPayModal('${v._id}')">Pay</button>
+          <button class="btn btn-secondary" onclick="openDisputeModal('${v._id}')">Dispute</button>
+        </td>
+      `;
+      table.appendChild(row);
+    });
+  }
+
+  // Call this with actual user ID when page loads
+  window.onload = () => {
+    const userId = localStorage.getItem('userId'); // Example: Replace with real logic
+    if (userId) loadEmployeeViolations(userId);
+    else console.error("User not logged in.");
+  };
+</script>
 
     <script src="../../js/script.js"></script>
 </body>

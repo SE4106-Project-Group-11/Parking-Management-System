@@ -1,6 +1,4 @@
 // Admin Dashboard JavaScript
-
-
 (() => {
   const API_BASE = '/api/admin';
   const pageMap = {
@@ -92,57 +90,32 @@
   }
 })();
 
-
 document.addEventListener('DOMContentLoaded', function() {
     // Sample data
     const permitRequests = [
         {
-            employeeId: '',
-            name: '',
-            vehicleNo: '',
-            requestDate: '',
-            status: ''
+            employeeId: '', name: '',vehicleNo: '',requestDate: '', status: ''
         }
     ];
 
     // Sample user data for search functionality
     const users = [
         {
-            id: '',
-            name: '',
-            email: '',
-            department: '',
-            vehicleNo: '',
-            permitStatus: '',
-            userType: ''
+            id: '', name: '',  email: '',department: '',vehicleNo: '',permitStatus: '',userType: ''
         }
     ];
 
     // Sample violations data
     const violations = [
         {
-            id: '',
-            vehicleNo: '',
-            date: '',
-            violationType: '',
-            fineAmount: 45,
-            userType: '',
-            userId: ''
+            id: '',vehicleNo: '',date: '', violationType: '', fineAmount: 45, userType: '', userId: ''
         }
     ];
 
     // Sample visitors data
     const visitors = [
         {
-            id: '',
-            name: '',
-            nic: '',
-            username: '',
-            password: '',
-            phone: '',
-            email: '',
-            address: '',
-            purpose: '',
+            id: '', name: '', nic: '', username: '', password: '', phone: '', email: '',    address: '',purpose: '',
             vehicleNo: ''
         }
     ];
@@ -150,17 +123,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sample non-employees data
     const nonEmployees = [
         {
-            id: '',
-            name: '',
-            nic: '',
-            username: '',
-            password: '',
-            phone: '',
-            email: '',
-            address: '',
-            vehicleNo: '',
-            permitType: '',
-            permitStatus: '',
+            id: '',name: '',nic: '',username: '',password: '',phone: '',email: '',
+            address: '',vehicleNo: '', permitType: '', permitStatus: '',
             permitValidUntil: ''
         }
     ];
@@ -235,7 +199,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 approvePermitRequest(employeeId);
             });
         });
-
         document.querySelectorAll('.reject-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const employeeId = this.getAttribute('data-id');
@@ -248,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateStatusCounts() {
         const pendingCount = permitRequests.filter(permit => permit.status === 'pending').length;
         const approvedCount = permitRequests.filter(permit => permit.status === 'approved').length;
-        
         const pendingCountEl = document.getElementById('pendingCount');
         const approvedCountEl = document.getElementById('approvedCount');
         
@@ -293,8 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!searchTerm) {
                 showNotification('Please enter a search term', 'error');
                 return;
-            }
-            
+            }           
             // Search for users by ID or vehicle number
             const results = users.filter(user => 
                 user.id.toLowerCase().includes(searchTerm) || 
@@ -385,8 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button class="btn btn-warning create-violation-btn" data-vehicle="${user.vehicleNo}" data-user="${user.userType}" data-id="${user.id}">Create Violation</button>
                 <button class="btn btn-primary generate-qr-btn" data-id="${user.id}" data-type="${user.userType}">Generate QR Code</button>
             </div>
-        `;
-        
+        `;        
         openModal(html);
         
         // Add event listener for create violation button
@@ -418,7 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Open violation modal
     function openViolationModal(vehicleNo = '', userType = '', userId = '') {
-        const nextViolationId = 'VIO' + (violations.length + 1).toString().padStart(3, '0');
         const currentDate = new Date().toISOString().split('T')[0];
         
         let html = `
@@ -430,7 +389,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <form id="violationForm">
                     <div class="form-group">
                         <label for="violationId">Violation ID</label>
-                        <input type="text" id="violationId" class="form-control" value="${nextViolationId}" readonly>
+                        <input type="text" id="violationId" class="form-control" readonly>
                     </div>
                     <div class="form-group">
                         <label for="violationVehicleNo">Vehicle No.</label>
@@ -518,97 +477,73 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    /*
-    // Submit violation
+    
     function submitViolation() {
-    const violationId = document.getElementById('violationId').value;
-    const vehicleNo = document.getElementById('violationVehicleNo').value;
-    const date = document.getElementById('violationDate').value;
-    const violationType = document.getElementById('violationType').value;
-    const fineAmount = parseFloat(document.getElementById('fineAmount').value);
-    const violationMessage = document.getElementById('violationMessage')?.value || '';
-    const userType = document.getElementById('userType').value;
-    const userId = document.getElementById('userId').value;
+    // Step 1: Get form values
+    const vehicleNo = document.getElementById("violationVehicleNo").value;
+    const date = document.getElementById("violationDate").value;
+    const violationType = document.getElementById("violationType").value;
+    const fineAmount = document.getElementById("fineAmount").value;
+    const message = document.getElementById("violationMessage").value;
+    const userType = document.getElementById("userType").value;
+    const userId = document.getElementById("userId").value;
 
+    // Step 2: Validate input
     if (!vehicleNo || !date || !violationType || isNaN(fineAmount) || !userType || !userId) {
         showNotification('Please fill all required fields', 'error');
         return;
     }
-         // Send to backend
+
+    // Step 3: Build the violation object
+    const newViolation = {
+        vehicleNo,  date,violationType,
+        fineAmount: parseFloat(fineAmount), // Convert to number
+        message,
+        userType,
+        userId
+    };
+
+    // Step 4: Send to backend
     fetch("http://localhost:5000/api/violations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            id: violationId,
-            vehicleNo,
-            date,
-            violationType,
-            fineAmount,
-            message: violationMessage,
-            userType,
-            userId
-        })
+        body: JSON.stringify(newViolation)
     })
-    .then(res => res.json())
+    .then(res => {
+        // Check if response is ok first
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+    })
     .then(data => {
-        if (data.violation) {
-            showNotification("Violation created & saved to DB", "success");
-            // Optionally reload data
-            loadViolationsFromBackend();
+        console.log('Response from server:', data); // Add this for debugging
+        
+        if (data.success && data.violation) {
+            showNotification("Violation created successfully", "success");
+            
+            // Step 5: Close modal
+            const modal = document.querySelector(".modal");
+            if (modal) {
+                modal.classList.remove("show");
+                setTimeout(() => modal.style.display = "none", 300);
+            }            
+            // Reload violations table
+            if (typeof loadViolationsFromBackend === 'function') {
+                loadViolationsFromBackend();
+            }
         } else {
             showNotification("Failed to save violation", "error");
         }
-        // Close modal
-        const modal = document.querySelector(".modal");
-        if (modal) {
-            modal.classList.remove("show");
-            setTimeout(() => (modal.style.display = "none"), 300);
-        }
     })
     .catch(error => {
-        console.error(" Error saving violation:", error);
+        console.error("Error saving violation:", error);
         showNotification("Server error", "error");
     });
-}
-
-        // Validate form
-        if (!vehicleNo || !date || !violationType || isNaN(fineAmount) || !userType || !userId) {
-            showNotification('Please fill all required fields', 'error');
-            return;
-        }
-        
-        // Create new violation
-        const newViolation = {
-            id: violationId,
-            vehicleNo,
-            date,
-            violationType,
-            fineAmount,
-            message: violationMessage,
-            userType,
-            userId
-        };
-        
-        // Add to violations array (in a real app, this would be an API call)
-        violations.push(newViolation);
-        
-        // Show success notification
-        showNotification('Violation created successfully', 'success');
-        
-        // Close modal
-        const modal = document.querySelector('.modal');
-        if (modal) {
-            modal.classList.remove('show');
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
-        }
-        
-        
+}      
         // Update violations table if it exists
         updateViolationsTable();
-    }
-    */
+    
     // Update violations table
     function updateViolationsTable() {
         const violationsTable = document.getElementById('violationsTable');
@@ -620,7 +555,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = document.createElement('tr');
             
             row.innerHTML = `
-                <td>${violation.id}</td>
+                <td>${violation.violationId}</td>
                 <td>${violation.vehicleNo}</td>
                 <td>${violation.date}</td>
                 <td>${violation.violationType}</td>
@@ -631,8 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="btn btn-primary btn-sm view-violation-btn" data-id="${violation.id}">View</button>
                     <button class="btn btn-danger btn-sm delete-violation-btn" data-id="${violation.id}">Delete</button>
                 </td>
-            `;
-            
+            `;            
             violationsTable.appendChild(row);
         });
         
@@ -642,8 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const violationId = this.getAttribute('data-id');
                 viewViolation(violationId);
             });
-        });
-        
+        });        
         document.querySelectorAll('.delete-violation-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const violationId = this.getAttribute('data-id');
@@ -654,7 +587,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update violation counts
         updateViolationCounts();
     }
-
     // Update violation counts
     function updateViolationCounts() {
         const newCountEl = document.getElementById('newCount');
@@ -667,8 +599,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (newCountEl) newCountEl.textContent = newViolations.length;
         if (resolvedCountEl) resolvedCountEl.textContent = violations.length - newViolations.length;
-    }
-    
+    }    
     // View violation
     function viewViolation(violationId) {
         const violation = violations.find(v => v.id === violationId);
@@ -681,7 +612,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="modal-body">
                 <div class="violation-details">
-                    <p><strong>Violation ID:</strong> ${violation.id}</p>
+                    <p><strong>Violation ID:</strong> ${violation.violationId}</p>
                     <p><strong>Vehicle No.:</strong> ${violation.vehicleNo}</p>
                     <p><strong>Date:</strong> ${violation.date}</p>
                     <p><strong>Violation Type:</strong> ${violation.violationType}</p>
@@ -739,8 +670,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 300);
             }
         });
-    }
-    
+    }    
     // Delete violation
     function deleteViolation(violationId) {
         const violationIndex = violations.findIndex(v => v.id === violationId);
@@ -751,8 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showNotification('Violation deleted successfully', 'success');
         
         updateViolationsTable();
-    }
-    
+    }    
     // Open modal
     function openModal(htmlOrId) {
         let modal = document.querySelector('.modal');
@@ -768,8 +697,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 10);
                 return;
             }
-        }
-        
+        }        
         // If not an ID or element not found, treat as HTML content
         if (!modal) {
             modal = document.createElement('div');
@@ -804,8 +732,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 300);
                 return;
             }
-        }
-        
+        }        
         // If no specific modal or modal not found, close any visible modal
         const modal = document.querySelector('.modal.show');
         if (modal) {
@@ -815,7 +742,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }
     }
-
     // Function to show notification
     function showNotification(message, type = 'success') {
         let notif = document.createElement('div');
@@ -828,8 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
             notif.classList.remove('show');
             setTimeout(() => notif.remove(), 300);
         }, 2500);
-    }
-    
+    }    
     // Capitalize first letter of string
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
@@ -874,8 +799,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const visitorId = this.getAttribute('data-id');
                 deleteVisitor(visitorId);
             });
-        });
-        
+        });        
         // Update visitor counts
         updateVisitorCounts();
     }
@@ -968,8 +892,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     setupVisitorsTable();
                 }
             });
-        }
-        
+        }        
         // Print QR code button
         const printVisitorQRBtn = document.getElementById('printVisitorQRBtn');
         if (printVisitorQRBtn) {
@@ -1165,7 +1088,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         setupVisitorsTable();
     }
-
     // View non-employee details
     function viewNonEmployee(neId) {
         const ne = nonEmployees.find(n => n.id === neId);
@@ -1196,8 +1118,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button class="btn btn-danger delete-ne-btn" data-id="${ne.id}">Delete</button>
                 <button class="btn btn-primary generate-qr-btn" data-id="${ne.id}" data-type="nonemployee">Generate QR Code</button>
             </div>
-        `;
-        
+        `;        
         openModal(html);
         
         // Add event listener for delete button
@@ -1214,7 +1135,6 @@ document.addEventListener('DOMContentLoaded', function() {
             generateQRCode(neId, userType);
         });
     }
-
     // Function to generate QR code
     function generateQRCode(userId, userType) {
         // Get user details based on user type
