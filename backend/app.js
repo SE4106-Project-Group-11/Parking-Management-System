@@ -1,5 +1,4 @@
 const express = require('express');
-
 const cors = require('cors');
 const path = require('path');           // for serving frontend
 require('dotenv').config();
@@ -8,6 +7,8 @@ const authRoutes = require('./routes/auth');
 const paymentRoutes = require('./routes/payment');
 const permitRoutes = require('./routes/permit');
 const adminRoutes = require('./routes/admin');
+const violationRoutes = require('./routes/violation');
+
 
 // Models for initial setup
 const Admin = require('./models/Admin');
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/permits', permitRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/violations', violationRoutes);
 
 // Route SPA entrypoints
 app.get('/', (req, res) => {

@@ -169,6 +169,19 @@ document.addEventListener('DOMContentLoaded', () => {
             startDateField.addEventListener('change', calculateEndDate);
         }
         
+        //get violation
+        function loadUserViolations(userId) {
+  fetch(`http://localhost:5000/api/violations/user/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+      // Populate your employee violations table
+      console.log(data); // For now, show in console
+    })
+    .catch(err => console.error(" Failed to load user violations:", err));
+}
+
+
+
         // Function to calculate end date based on duration and start date
         function calculateEndDate() {
             try {
