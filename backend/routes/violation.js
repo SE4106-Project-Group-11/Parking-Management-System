@@ -11,4 +11,7 @@ router.get('/all', violationController.getAllViolations);
 // Get violations by user
 router.get('/user/:userId', violationController.getViolationsByUser);
 
+// Delete violation
+router.delete('/:id', violationController.deleteViolation);
+
 module.exports = router;

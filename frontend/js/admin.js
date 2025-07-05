@@ -308,8 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const userId = this.getAttribute('data-id');
                 viewUserDetails(userId);
             });
-        });
-        
+        });        
         document.querySelectorAll('.create-violation-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const vehicleNo = this.getAttribute('data-vehicle');
@@ -1892,8 +1891,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 300);
                 }
             }
-        });
-        
+        });        
         // Close modal when clicking outside the modal content
         const modals = document.querySelectorAll('.modal');
         modals.forEach(function(modal) {

@@ -61,3 +61,20 @@ exports.getViolationsByUser = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+exports.deleteViolation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const deletedViolation = await Violation.findByIdAndDelete(id);
+    
+    if (!deletedViolation) {
+      return res.status(404).json({ success: false, error: 'Violation not found' });
+    }
+    
+    return res.status(200).json({ success: true, message: 'Violation deleted successfully' });
+  } catch (err) {
+    console.error("Error deleting violation:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
