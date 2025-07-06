@@ -9,6 +9,17 @@ exports.requestPermit = async (req, res) => {
   }
 };
 
+exports.getPermitByUserId = async (req, res) => {
+  try {
+    const permit = await Permit.findOne({ userId: req.params.userId, status: 'active' });
+    if (!permit) return res.status(404).json({ message: 'No permit found' });
+
+    res.json({ permit });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getPermits = async (req, res) => {
   try {
     const permits = await Permit.find().populate('userId');

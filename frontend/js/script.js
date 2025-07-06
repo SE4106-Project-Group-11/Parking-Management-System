@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   localStorage.setItem('token', data.token);
   localStorage.setItem('userRole', data.user.role);
   localStorage.setItem('userName', data.user.name);
+  localStorage.setItem('dbUserId', data.user.id); // Mongo _id
 
   //  Store the correct userId based on role
   if (data.user.role === 'employee' && data.user.empID) {
