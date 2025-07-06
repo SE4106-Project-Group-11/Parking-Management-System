@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
   if (!loginForm) {
@@ -23,26 +22,34 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       if (res.ok) {
-        alert('Login successful!');
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userRole', data.user.role);
-        localStorage.setItem('userName', data.user.name);
+  alert('Login successful!');
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('userRole', data.user.role);
+  localStorage.setItem('userName', data.user.name);
 
-       if (data.user.role === 'admin') {
-        window.location.href = 'pages/admin/dashboard.html';
-      } else if (data.user.role === 'employee') {
-        window.location.href = 'pages/employee/dashboard.html';
-      } else if (data.user.role === 'visitor') {
-        window.location.href = 'pages/visitor/dashboard.html';
-      } else if (data.user.role === 'nonemployee') {
-        window.location.href = 'pages/nonemployee/dashboard.html';
-      } else {
-        alert('Unknown user role. Cannot redirect.');
-      }
+  //  Store the correct userId based on role
+  if (data.user.role === 'employee' && data.user.empID) {
+    localStorage.setItem('userId', data.user.empID);  // e.g., EMP111
+  } else {
+    localStorage.setItem('userId', data.user.id);     // use Mongo _id for others
+  }
 
-      } else {
-        alert(data.message || 'Login failed.');
-      }
+  //  Redirect based on role
+  if (data.user.role === 'admin') {
+    window.location.href = 'pages/admin/dashboard.html';
+  } else if (data.user.role === 'employee') {
+    window.location.href = 'pages/employee/dashboard.html';
+  } else if (data.user.role === 'visitor') {
+    window.location.href = 'pages/visitor/dashboard.html';
+  } else if (data.user.role === 'nonemployee') {
+    window.location.href = 'pages/nonemployee/dashboard.html';
+  } else {
+    alert('Unknown user role. Cannot redirect.');
+  }
+
+} else {
+  alert(data.message || 'Login failed.');
+}
     } catch (err) {
       console.error(err);
       alert('An error occurred during login.');
@@ -63,7 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.logout-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            window.location.href = '../index.html';
+            // Clear all stored data
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userId');
+            window.location.href = '../../index.html';
         });
     });
 
@@ -168,20 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (startDateField) {
             startDateField.addEventListener('change', calculateEndDate);
         }
-        
-        //get violation
-        function loadUserViolations(userId) {
-  fetch(`http://localhost:5000/api/violations/user/${userId}`)
-    .then(res => res.json())
-    .then(data => {
-      // Populate your employee violations table
-      console.log(data); // For now, show in console
-    })
-    .catch(err => console.error(" Failed to load user violations:", err));
-}
-
-
-
+  
         // Function to calculate end date based on duration and start date
         function calculateEndDate() {
             try {
@@ -396,6 +395,182 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ===== NEW VIOLATION FUNCTIONALITY =====
+    
+    // Load user violations when on violations page
+    if (window.location.pathname.includes('violations.html')) {
+        loadUserViolations();
+    }
+
+    // Function to load violations for the current user
+    async function loadUserViolations() {
+  const userId   = localStorage.getItem('userId');
+  const userRole = localStorage.getItem('userRole');
+  const token    = localStorage.getItem('token');
+
+  if (!userId || !token) return showViolationError('Please log in.');
+
+  const res = await fetch(
+    `http://localhost:5000/api/violations/user/${userId}?userType=${userRole}`,
+    {
+      headers: { 'Authorization': `Bearer ${token}` }
+    }
+  );
+
+            
+  const data = await res.json();
+  if (data.success) {
+    populateViolationsTable(data.violations);
+    updateViolationStats(data.violations);
+  } else {
+    showViolationError(data.error);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (location.pathname.endsWith('violations.html')) {
+    loadUserViolations();
+  }
+});
+
+    // Function to populate violations table
+    function populateViolationsTable(violations) {
+  const tbody = document.querySelector('.data-table tbody');
+  tbody.innerHTML = '';
+
+  if (violations.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6">No violations found.</td></tr>';
+    return;
+  }
+
+  violations.forEach(v => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatDate(v.date)}</td>
+      <td>${v.vehicleNo}</td>
+      <td>${v.violationType}</td>
+      <td>$${v.fineAmount.toFixed(2)}</td>
+      <td>${capitalizeFirstLetter(v.status || 'pending')}</td>
+      <td>
+        ${v.status === 'pending'
+          ? `<button onclick="acknowledgeViolation('${v._id}')">Ack</button>
+             <button onclick="resolveViolation('${v._id}')">Resolve</button>`
+          : `<span>—</span>`
+        }
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+    // Function to update violation statistics
+    function updateViolationStats(violations) {
+        const stats = {
+            total: violations.length,
+            pending: violations.filter(v => !v.status || v.status === 'pending').length,
+            acknowledged: violations.filter(v => v.status === 'acknowledged').length,
+            resolved: violations.filter(v => v.status === 'resolved' || v.resolved).length
+        };
+
+        // Update stats in UI if elements exist
+        const totalElement = document.getElementById('totalViolations');
+        const pendingElement = document.getElementById('pendingViolations');
+        const acknowledgedElement = document.getElementById('acknowledgedViolations');
+        const resolvedElement = document.getElementById('resolvedViolations');
+
+        if (totalElement) totalElement.textContent = stats.total;
+        if (pendingElement) pendingElement.textContent = stats.pending;
+        if (acknowledgedElement) acknowledgedElement.textContent = stats.acknowledged;
+        if (resolvedElement) resolvedElement.textContent = stats.resolved;
+    }
+
+    //resolve
+    async function resolveViolation(id) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`http://localhost:5000/api/violations/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ status: 'resolved' })
+  });
+  const data = await res.json();
+  if (data.success) loadUserViolations();
+}
+
+
+    // Global functions for violation actions
+    window.acknowledgeViolation = async function(violationId) {
+        await updateViolationStatus(violationId, 'acknowledged');
+    };
+
+    window.resolveViolation = async function(violationId) {
+        await updateViolationStatus(violationId, 'resolved');
+    };
+
+    // Function to update violation status
+    async function updateViolationStatus(violationId, status) {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            showNotification('Authentication required', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/violations/${violationId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                showNotification(`Violation ${status} successfully!`, 'success');
+                // Reload violations to show updated status
+                loadUserViolations();
+            } else {
+                throw new Error(data.error || 'Failed to update status');
+            }
+        } catch (error) {
+            console.error('Error updating violation status:', error);
+            showNotification('Failed to update violation status', 'error');
+        }
+    }
+
+    // Helper function to show violation loading error
+    function showViolationError(message) {
+        const tableBody = document.querySelector('.data-table tbody');
+        
+        const errorHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">
+                    <div style="color: #e74c3c;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        <h3 style="margin: 0 0 1rem 0;">Error Loading Violations</h3>
+                        <p style="margin: 0 0 1rem 0;">${message}</p>
+                        <button class="btn btn-primary" onclick="loadUserViolations()">Retry</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        if (tableBody) {
+            tableBody.innerHTML = errorHTML;
+        }
+    }
+
+    // ===== END VIOLATION FUNCTIONALITY =====
+
     // Dynamic Violations Table Rendering (for all dashboards)
     const violationsData = [
         {
@@ -458,13 +633,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function showNotification(message, type = 'success') {
         let notif = document.createElement('div');
         notif.className = `notification ${type}`;
+        notif.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#27ae60' : '#e74c3c'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
         notif.textContent = message;
         document.body.appendChild(notif);
-        setTimeout(() => notif.classList.add('show'), 10);
+        
+        setTimeout(() => notif.style.transform = 'translateX(0)', 10);
         setTimeout(() => {
-            notif.classList.remove('show');
+            notif.style.transform = 'translateX(100%)';
             setTimeout(() => notif.remove(), 300);
-        }, 2500);
+        }, 3000);
     }
 
     // Delegate Pay Fine/Dispute button clicks
@@ -543,13 +732,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
-
-
 // Utility function to format date
 function formatDate(dateString) {
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    const options = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+}
+
+// Utility function to capitalize first letter
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 // Mock functions for API calls (in real app, these would make actual API calls)
@@ -618,5 +815,4 @@ function fetchParkingHistory(userId) {
             ]);
         }, 300);
     });
-} 
-
+}

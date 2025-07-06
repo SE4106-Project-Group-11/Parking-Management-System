@@ -1,4 +1,5 @@
 const Violation = require('../models/Violation');
+
 async function generateViolationId() {
   const last = await Violation.findOne().sort({ _id: -1 });
   let lastId = last?.violationId || "VIO000";
@@ -10,26 +11,18 @@ async function generateViolationId() {
 exports.createViolation = async (req, res) => {
   try {
     const {
-      vehicleNo,
-      date,
-      violationType,
-      fineAmount,
-      message,
-      userType,
-      userId
+      vehicleNo,date,
+      violationType,fineAmount,message,
+      userType,userId
     } = req.body;
 
     const violationId = await generateViolationId(); // generate unique ID
 
     const newViolation = new Violation({
-      violationId,
-      vehicleNo,
-      date,
-      violationType,
-      fineAmount,
-      message,
-      userType,
-      userId
+      violationId,vehicleNo,
+      date, violationType,
+      fineAmount,message,
+      userType,userId
     });
 
     const saved = await newViolation.save();
@@ -54,7 +47,11 @@ exports.getAllViolations = async (req, res) => {
 exports.getViolationsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const list = await Violation.find({ userId }).sort({ date: -1 });
+    const { userType } = req.query;  
+    const filter = { userId };
+    if (userType) filter.userType = userType;
+
+    const list = await Violation.find( filter ).sort({ date: -1 });
     res.status(200).json({ success: true, violations: list });
   } catch (err) {
     console.error("Error fetching user violations:", err);
@@ -77,4 +74,11 @@ exports.deleteViolation = async (req, res) => {
     console.error("Error deleting violation:", err);
     return res.status(500).json({ success: false, error: err.message });
   }
+};
+
+exports.updateViolationStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const vio = await Violation.findByIdAndUpdate(id, { status }, { new: true });
+  res.json({ success: true, violation: vio });
 };

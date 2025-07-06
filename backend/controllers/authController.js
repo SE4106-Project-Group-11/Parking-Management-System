@@ -148,49 +148,50 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    // pull userType (not role) from the body
     const { email, password, userType } = req.body;
 
-    // pick the right model based on userType
     let Model;
     switch (userType) {
-      case 'admin':
-        Model = Admin; break;
-      case 'employee':
-        Model = Employee; break;
-      case 'nonemployee':
-        Model = NonEmployee; break;
-      case 'visitor':
-        Model = Visitor; break;
-      default:
-        return res.status(400).json({ message: 'Invalid user type' });
+      case 'admin': Model = Admin; break;
+      case 'employee': Model = Employee; break;
+      case 'nonemployee': Model = NonEmployee; break;
+      case 'visitor': Model = Visitor; break;
+      default: return res.status(400).json({ message: 'Invalid user type' });
     }
 
-    // lookup
     const user = await Model.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // only non-admins need approval
     if (userType !== 'admin' && user.status !== 'approved') {
       return res.status(403).json({ message: 'Account not approved yet' });
     }
 
-    // check password
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // issue JWT with the userType inside
     const token = jwt.sign(
       { id: user._id, role: userType },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
 
+    const userResponse = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: userType
+    };
+
+    //  Include empID if employee
+    if (userType === 'employee' && user.empID) {
+      userResponse.empID = user.empID;
+    }
+
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: userType }
+      user: userResponse
     });
   } catch (err) {
     console.error(err);
