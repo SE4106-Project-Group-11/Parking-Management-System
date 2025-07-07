@@ -1,53 +1,50 @@
-
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
-  if (!loginForm) {
-    console.error('Login form not found');
-    return;
+  if (loginForm) {
+    // Only run login-related code if the form exists
+    loginForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const userType = document.getElementById('userType').value;
+
+      try {
+        const res = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, userType })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert('Login successful!');
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userRole', data.user.role);
+          localStorage.setItem('userName', data.user.name);
+
+         if (data.user.role === 'admin') {
+          window.location.href = 'pages/admin/dashboard.html';
+        } else if (data.user.role === 'employee') {
+          window.location.href = 'pages/employee/dashboard.html';
+        } else if (data.user.role === 'visitor') {
+          window.location.href = 'pages/visitor/dashboard.html';
+        } else if (data.user.role === 'nonemployee') {
+          window.location.href = 'pages/nonemployee/dashboard.html';
+        } else {
+          alert('Unknown user role. Cannot redirect.');
+        }
+
+        } else {
+          alert(data.message || 'Login failed.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred during login.');
+      }
+    });
   }
-
-  loginForm.addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const userType = document.getElementById('userType').value;
-
-    try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, userType })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert('Login successful!');
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userRole', data.user.role);
-        localStorage.setItem('userName', data.user.name);
-
-       if (data.user.role === 'admin') {
-        window.location.href = 'pages/admin/dashboard.html';
-      } else if (data.user.role === 'employee') {
-        window.location.href = 'pages/employee/dashboard.html';
-      } else if (data.user.role === 'visitor') {
-        window.location.href = 'pages/visitor/dashboard.html';
-      } else if (data.user.role === 'nonemployee') {
-        window.location.href = 'pages/nonemployee/dashboard.html';
-      } else {
-        alert('Unknown user role. Cannot redirect.');
-      }
-
-      } else {
-        alert(data.message || 'Login failed.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('An error occurred during login.');
-    }
-  });
 });
 
     // Sidebar toggle for mobile
@@ -618,5 +615,5 @@ function fetchParkingHistory(userId) {
             ]);
         }, 300);
     });
-} 
+}
 

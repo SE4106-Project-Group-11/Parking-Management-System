@@ -1,15 +1,13 @@
+// backend/routes/payment.js
 const express = require('express');
-const router  = express.Router();
-const auth    = require('../middleware/auth');
+const router = express.Router();
+const { authenticateToken, requireAdmin } = require('../utils/authMiddleware'); // CORRECTED PATH
 const { createPayment, getMyPayments, getAllPayments } = require('../controllers/paymentController');
 
-// POST /api/payments         → any logged in user
-router.post('/', auth(), createPayment);
+router.post('/', authenticateToken, createPayment);
 
-// GET  /api/payments/me      → that user’s payments
-router.get('/me', auth(), getMyPayments);
+router.get('/me', authenticateToken, getMyPayments);
 
-// GET  /api/payments         → admin only
-router.get('/', auth('admin'), getAllPayments);
+router.get('/', authenticateToken, requireAdmin, getAllPayments);
 
 module.exports = router;

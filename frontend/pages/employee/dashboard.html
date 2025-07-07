@@ -3,93 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Panel - Parking Management System</title>
+    <title>Employee Dashboard - Parking Management</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/employee.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <i class="fas fa-parking"></i>
-                <h2>Employee Panel</h2>
+                <h3>Employee Panel</h3>
             </div>
             <ul class="sidebar-menu">
-                <li>
-                    <a href="dashboard.html" class="active">
-                        <i class="fas fa-tachometer-alt"></i> My Permits
-                    </a>
-                </li>
-                <li>
-                    <a href="violations.html">
-                        <i class="fas fa-exclamation-triangle"></i> My Violations
-                    </a>
-                </li>
-                <li>
-                    <a href="qrcode.html">
-                        <i class="fas fa-qrcode"></i> My QR Code
-                    </a>
-                </li>
-
-                <li>
-                    <a href="payment-management.html">
-                        <i class="fas fa-money-bill-wave"></i> Payments
-                    </a>
-                </li>
-                <li>
-                    <a href="../../index.html" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
-                </li>
+                <li><a href="dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> My Permits</a></li>
+                <li><a href="violations.html"><i class="fas fa-exclamation-triangle"></i> My Violations</a></li>
+                <li><a href="qrcode.html"><i class="fas fa-qrcode"></i> My QR Code</a></li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li><a href="../../index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </aside>
-
-        <!-- Mobile Sidebar Toggle -->
-        <button id="sidebarToggle" class="sidebar-toggle">
-            <i class="fas fa-bars"></i>
-        </button>
-
-        <!-- Main Content Area -->
         <main class="main-content">
-            <div class="top-bar">
-                <h1>My Parking Permits</h1>
+            <header class="main-header">
+                <button class="sidebar-toggle-btn" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+                <h1><span id="employeeNameDisplay">Employee!</span></h1>
                 <div class="user-info">
-                    <span>Viyash</span>
-                    <button class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
+                    <span id="employeeEmailDisplay">employee@example.com</span>
+                    <span id="employeeIdDisplay" style="font-size: 0.9em; color: #888; margin-left: 10px;">ID: LOADING...</span>
                 </div>
-            </div>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </header>
 
-            <!-- Request Permit Button Card -->
-            <div class="card" style="margin-bottom: 2rem;">
-                <div class="card-body" style="display: flex; justify-content: flex-end; align-items: center;">
-                    <button class="btn btn-primary" data-modal-target="requestPermitModal">
-                        <i class="fas fa-plus"></i> Request New Permit
-                    </button>
-                </div>
-            </div>
-
-            <!-- Current Permit Status Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>Current Permit Status</h2>
-                </div>
-                <div class="card-body">
+            <section class="dashboard-overview">
+                <div class="card">
+                    <h2>My Current Permit</h2>
                     <div class="permit-status">
-                        <span class="status-badge status-active">Active until 2026-03-14</span>
-                        <p class="permit-detail">Vehicle: ABC123</p>
+                        <span class="status-badge status-inactive" id="currentPermitStatus">No Active Permit</span>
                     </div>
+                    <p class="permit-detail" id="currentPermitDetails"></p>
                 </div>
-            </div>
 
-                        
+                <div class="card">
+                    <h2>Pending Violations</h2>
+                    <p id="pendingViolationsCount">0</p>
+                </div>
+
+                <div class="card">
+                    <h2>Available Parking Spots</h2>
+                    <p id="availableParkingSpots">--</p>
+                </div>
+                <button class="btn btn-primary" id="requestPermitBtn">
+                    <i class="fas fa-plus"></i> Request New Permit
+                </button>
+            </section>
+
+            <section class="dashboard-data">
+                <div class="card">
+                    <h2>My Permits</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Permit ID</th>
+                                <th>Type</th>
+                                <th>Vehicle No.</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="permitsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h2>My Violations</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Vehicle No.</th>
+                                <th>Violation Type</th>
+                                <th>Fine ($)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="violationsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- Request Permit Modal -->
     <div id="requestPermitModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -104,8 +113,16 @@
                     </div>
                     <div class="form-group">
                         <label for="employeeId">Employee ID <span class="required">*</span></label>
-                        <input type="text" id="employeeId" class="form-control" required>
+                        <input type="text" id="employeeId" class="form-control" required readonly>
                         <small class="form-text error-message" id="employeeIdError"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerType">Owner Type <span class="required">*</span></label>
+                        <select id="ownerType" class="form-control" required disabled>
+                            <option value="employee" selected>Employee</option>
+                            <option value="nonemployee">Non-Employee</option>
+                            <option value="visitor">Visitor</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="permitType">Permit Type <span class="required">*</span></label>
@@ -115,14 +132,6 @@
                             <option value="temporary">Temporary</option>
                         </select>
                         <small class="form-text error-message" id="permitTypeError"></small>
-                    </div>
-                    <div class="form-group">
-                        <label for="ownerType">Owner Type <span class="required">*</span></label>
-                        <select id="ownerType" class="form-control" required>
-                            <option value="employee" selected>Employee</option>
-                            <option value="nonemployee">Non-Employee</option>
-                            <option value="visitor">Visitor</option>
-                        </select>
                     </div>
                     <div class="form-group">
                         <label for="duration">Duration <span class="required">*</span></label>
@@ -137,7 +146,7 @@
                     </div>
                     <div class="form-group">
                         <label for="vehicleNo">Vehicle Number <span class="required">*</span></label>
-                        <input type="text" id="vehicleNo" class="form-control" required>
+                        <input type="text" id="vehicleNo" class="form-control" placeholder="ABC-1234" required>
                         <small class="form-text error-message" id="vehicleNoError"></small>
                     </div>
                     <div class="form-group">
@@ -147,6 +156,7 @@
                             <option value="car">Car</option>
                             <option value="motorcycle">Motorcycle</option>
                             <option value="van">Van</option>
+                            <option value="lorry">Lorry</option>
                         </select>
                         <small class="form-text error-message" id="vehicleTypeError"></small>
                     </div>
@@ -168,7 +178,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelPermitRequest">Cancel</button>
+                <button class="btn btn-secondary close-modal" id="cancelPermitRequest">Cancel</button>
                 <button class="btn btn-primary" id="submitPermitRequest">
                     <span>Submit Request</span>
                     <i class="fas fa-spinner fa-spin" style="display: none;"></i>
@@ -177,18 +187,15 @@
         </div>
     </div>
 
+    <div id="dynamicModal" class="modal">
+        <div class="modal-content">
+            </div>
+    </div>
+    <div id="notification-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="../../js/script.js"></script>
-    
-
-    <script>
-        const role = localStorage.getItem('userRole');
-        const allowedRole = 'employee'; 
-
-        if (role !== allowedRole) {
-            alert('Access denied.');
-            window.location.href = 'index.html';
-        }
-    </script>
-
+    <script src="../../js/employee.js"></script>
 </body>
 </html>
