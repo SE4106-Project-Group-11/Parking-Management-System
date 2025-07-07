@@ -132,3 +132,59 @@ body {
     margin: 0;
 }
 
+/* Payment Content */
+.payment-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.payment-section {
+    border-left: 4px solid #2563eb;
+    padding-left: 1rem;
+}
+
+.payment-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.payment-text {
+    color: #374151;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.payment-highlight {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+.highlight-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.highlight-icon {
+    color: #dc2626;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.highlight-title {
+    font-weight: 600;
+    color: #7f1d1d;
+    margin-bottom: 0.5rem;
+}
+
+.highlight-text {
+    font-size: 0.875rem;
+    color: #991b1b;
+    margin: 0;
+}
+
+
