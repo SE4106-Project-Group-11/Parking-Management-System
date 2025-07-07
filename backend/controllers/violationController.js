@@ -9,12 +9,15 @@ exports.createViolation = async (req, res) => {
   try {
     const { violationId, vehicleNo, date, violationType, fineAmount, message, userType, userId } = req.body;
 
+
     if (!violationId || !vehicleNo || !date || !violationType || !fineAmount || !userType || !userId) {
         return res.status(400).json({ success: false, message: 'Missing required violation fields.' });
     }
 
+
     const violation = await Violation.create({
       violationId, vehicleNo, date, violationType, fineAmount, message, userType, userId
+
     });
 
     let UserModel;
@@ -54,9 +57,11 @@ exports.getAllViolations = async (req, res) => {
 
 exports.getViolationsByUser = async (req, res) => {
   try {
+
     const targetUserId = req.params.userId;
     const violations = await Violation.find({ userId: targetUserId }).sort('-date');
     res.json({ success: true, violations });
+
   } catch (err) {
     console.error('getViolationsByUser error:', err);
     res.status(500).json({ success: false, message: err.message });
@@ -89,6 +94,7 @@ exports.deleteViolation = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 exports.payViolation = async (req, res) => {
     try {
@@ -159,3 +165,4 @@ exports.disputeViolation = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error during dispute submission.' });
     }
 };
+

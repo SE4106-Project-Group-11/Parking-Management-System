@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 
 const permitSchema = new mongoose.Schema({
+
   permitId: { type: String, required: true, unique: true },
   userType: { type: String, required: true, enum: ['employee', 'nonemployee', 'visitor'] },
   userId: { type: mongoose.Schema.Types.ObjectId, refPath: 'userType', required: true },
@@ -14,6 +15,7 @@ const permitSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'approved', 'rejected', 'expired'], default: 'pending' },
 }, {
   timestamps: true
+
 });
 
 module.exports = mongoose.model('Permit', permitSchema);

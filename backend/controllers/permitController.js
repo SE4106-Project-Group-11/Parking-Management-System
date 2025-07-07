@@ -46,6 +46,7 @@ exports.requestPermit = async (req, res) => {
   }
 };
 
+
 exports.getMyPermits = async (req, res) => {
   try {
     const userId = req.user.id;

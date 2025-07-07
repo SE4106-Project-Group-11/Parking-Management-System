@@ -1,6 +1,7 @@
 // backend/routes/permit.js
 const express = require('express');
 const router = express.Router();
+
 const { authenticateToken, requireAdmin } = require('../utils/authMiddleware'); // CORRECTED PATH
 const { requestPermit, getMyPermits, getAllPermits } = require('../controllers/permitController');
 

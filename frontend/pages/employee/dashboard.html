@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<<<<<<< HEAD
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Dashboard - Parking Management</title>
@@ -184,8 +185,49 @@
                     <i class="fas fa-spinner fa-spin" style="display: none;"></i>
                 </button>
             </div>
+
         </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <button id="requestPermitBtn" class="btn btn-primary">+ Request New Permit</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Current Permit Status</h2></div>
+        <div class="card-body">
+          <div id="permit-status">Loading...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Permit Request Modal (optional) -->
+  <div id="requestPermitModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Request New Permit</h2>
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="permitRequestForm">
+          <label>Vehicle No.</label>
+          <input type="text" id="vehicleNo" required>
+          <label>Vehicle Type</label>
+          <select id="vehicleType" required>
+            <option value="">Select</option><option value="car">Car</option><option value="bike">Bike</option>
+          </select>
+          <label>Permit Type</label>
+          <select id="permitType" required>
+            <option value="">Select</option><option value="general">General</option><option value="priority">Priority</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
     </div>
+  </div>
 
     <div id="dynamicModal" class="modal">
         <div class="modal-content">
@@ -197,5 +239,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="../../js/script.js"></script>
     <script src="../../js/employee.js"></script>
+
 </body>
 </html>
