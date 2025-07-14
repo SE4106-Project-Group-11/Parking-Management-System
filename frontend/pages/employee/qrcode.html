@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My QR Code - Employee Panel</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/employee.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Employee Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> My Permits </a></li>
+                <li>
+                    <a href="violations.html">
+                        <i class="fas fa-exclamation-triangle"></i> My Violations
+                    </a>
+                </li>
+                <li>
+                    <a href="qrcode.html" class="active"> <i class="fas fa-qrcode"></i> My QR Code
+                    </a>
+                </li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li>
+                    <a href="../../index.html" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>My QR Code</h1>
+                <div class="user-info">
+                    <span id="headerUserName">Loading Name...</span> <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Parking Permit QR Code</h2>
+                </div>
+                <div class="card-body">
+                    <div class="user-qrcode-container">
+                        <div class="user-qrcode-image">
+                            <img id="qrCodeImage" src="" alt="Loading QR Code...">
+                        </div>
+                        <div class="user-qrcode-info">
+                            <p><strong>Employee ID:</strong> <span id="qrEmployeeId">Loading...</span></p>
+                            <p><strong>Name:</strong> <span id="qrEmployeeName">Loading...</span></p>
+                            <p><strong>Email:</strong> <span id="qrEmployeeEmail">Loading...</span></p>
+                            <p><strong>Vehicle:</strong> <span id="qrVehicleNo">Loading...</span></p>
+                            <p><strong>Permit Status:</strong> <span class="status-badge status-none" id="qrPermitStatus">Loading...</span></p>
+                            <div class="user-qrcode-actions">
+                                <button class="btn btn-primary" id="printQRCode" disabled>
+                                    <i class="fas fa-print"></i> Print QR Code
+                                </button>
+                                <button class="btn btn-secondary" id="downloadQRCode" disabled>
+                                    <i class="fas fa-download"></i> Download QR Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="qrcode-instructions">
+                        <h3><i class="fas fa-info-circle"></i> How to use your QR Code</h3>
+                        <ul>
+                            <li>Present this QR code at the parking facility entrance and exit.</li>
+                            <li>Ensure your phone brightness is set to maximum when displaying the QR code.</li>
+                            <li>You can also print this QR code and keep it in your vehicle.</li>
+                            <li>This QR code is linked to your employee account and vehicle.</li>
+                            <li>Only active permits will generate a scannable QR code.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../js/script.js"></script>
+    <script src="../../js/qrcode.js"></script>
+</body>
+</html>
