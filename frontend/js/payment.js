@@ -1,3 +1,4 @@
+
 // frontend/js/payment.js
 
 // --- GLOBAL UTILITY FUNCTIONS (Embedded directly in payment.js for guaranteed access) ---
@@ -409,3 +410,4 @@ document.addEventListener('DOMContentLoaded', async function() {
 // * **A screenshot of your browser's Network tab** (showing the `process-stripe-payment` request and its status/response).
 
 // This will show us the success or any new errors with the Stripe integration.
+

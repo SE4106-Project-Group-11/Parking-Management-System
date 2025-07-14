@@ -1,3 +1,4 @@
+
 // backend/models/Payment.js
 const mongoose = require('mongoose');
 
@@ -10,6 +11,7 @@ const paymentSchema = new mongoose.Schema({
   date:        { type: Date, default: Date.now },
   transactionId: { type: String, unique: true, sparse: true }, // Added for gateway transaction IDs
   gatewayResponse: { type: Object } // Added to store full gateway response
+
 });
 
 module.exports = mongoose.model('Payment', paymentSchema);
