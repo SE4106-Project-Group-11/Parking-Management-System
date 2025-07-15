@@ -269,6 +269,52 @@ body {
     font-size: 0.875rem;
     color: #6b7280;
 }
+
+/* Stats Section */
+.stats {
+    padding: 5rem 0;
+    background: white;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 2rem;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #1e40af;
+}
+
       /*                                            About Us                                              */
 
 
