@@ -462,103 +462,76 @@ body {
 }
 
 
-/*                            How It Works                              */
-
-.how {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
-  padding: 50px;
-  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
-  url('https://i.pinimg.com/736x/3c/11/5f/3c115f879d68db7ac8e32c0f4196e071.jpg');
-  background-size: cover;
-  background-position: center;
+/* How It Works Section */
+.how-it-works {
+    padding: 5rem 0;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
 }
 
-.how h1 {
-  margin-bottom: 30px;
-  color: #fff;
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem;
 }
 
-.steps {
-  display: flex;
-  gap: 50px;
-  margin-left: 150px;
+.step-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
-.step-container {
-  position: relative;
+.step-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
 }
 
-.small-triangle {
-  width: 80px;
-  height: 150px;
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-  position: absolute;
-  left: -80px; 
-  top: 20px;  
-  z-index: 0;
-  margin-right: 10px;
+.step-image {
+    overflow: hidden;
+    position: relative;
 }
 
-.small-triangle-1 {
-  background: #134c8d;
+.step-image img {
+    width: 100%;
+    height: 128px;
+    object-fit: cover;
 }
 
-.small-triangle-2 {
-  background: #2BAEBF;
+.step-content {
+    padding: 1.5rem;
+    text-align: center;
 }
 
-.small-triangle-3 {
-  background: #A633D6;
+.step-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 2rem;
 }
 
-.small-triangle-4 {
-  background: #b8d633;
+.step-number {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
 }
 
-.step {
-  width: 200px;
-  height: 200px;
-  background: rgba(255, 255, 255, 0.681);
-  padding: 30px 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  position: relative;
-  z-index: 1;
-  margin-right: 50px;
-  margin-left: 10px;
+.step-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 0.75rem;
 }
 
-.step:hover{
-  scale: 1.05;
-  transition: all ease 0.3s;
-}
-
-.step-title {
-  font-weight: bold;
-  margin-bottom: 10px;
-  font-size: 20px;
-  color: #25255d;
-}
-
-/* Footer */
-footer {
-  margin-top: 45px;
-  padding: 1rem 0;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #c6eff4;
-}
-
-.footer-nav a {
-  margin: 0 0.5rem;
-  color: #aaa;
-}
-
-.footer-nav a:hover {
-  color: #68b0f8;
+.step-content p {
+    color: #1e40af;
 }
 
 /* Animation Properties*/
