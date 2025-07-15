@@ -2,99 +2,148 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    letter-spacing: 1px;
-  }
-  
-  body, html {
-    font-family: Poppins, sans-serif;
-    height: 100%;
-    scroll-behavior: smooth;
-  }
-  
-  /*                                             Topic Section                                                 */
-  .container {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-  }
-  
-  .sidebar {
-    background-color: #2c3e50;
-    width: 80px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 20px;
-    border-right: 2px solid #2c3e50;
-  }
-  
-  .logo {
-    text-align: center;
-    margin-bottom: 50px;
-    color: white;
-    font-weight: bold;
-    font-size: 12px;
-  }
-  
-  .main-content {
-    height: 100vh;
-    flex-grow: 1;
-    position: relative;
-    background-image: url('https://i.pinimg.com/736x/ec/bb/1b/ecbb1b03925798f53f19706289eff092.jpg');
-    background-size: cover;
-    background-position: center;
-  }
-  
-  .navbar {
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navigation */
+.navbar {
     position: fixed;
-    width: 100vw;
+    top: 0;
     left: 0;
+    right: 0;
     z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    padding: 1rem 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
-    padding: 20px 40px;
-    background: rgba(0, 0, 0, 0.6);
-  }
-  
-  .navbar ul {
-    list-style: none;
+    align-items: center;
+}
+
+.nav-brand {
     display: flex;
-    gap: 30px;
-  }
-  
-  .navbar a {
-    text-decoration: none;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: white;
-    font-size: 14px;
+}
+
+.brand-name {
+    font-size: 1.25rem;
     font-weight: bold;
-  }
-  
-  #button-line {
+    color: #1e3a8a;
+}
+
+.nav-menu {
     display: flex;
-    gap: 20px;
-  }
-  
-  .main-buttons a {
-    background-color: #6e9fc0;
-    padding: 10px 20px;
-    color: #fff;
+    gap: 2rem;
+}
+
+.nav-link {
     text-decoration: none;
-    font-weight: bold;
-    border-radius: 10px;
-  }
-  
-  .main-buttons a:hover {
-    border: 1px solid white;
-    background-color: #34495e;
-    font-weight: bold;
-  }
-  
-  .main-buttons:hover {
-    scale: 1.05;
-    transition: all ease 0.6s;
+    color: #1e40af;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #1e3a8a;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-signin {
+    background: none;
+    border: none;
+    color: #1e40af;
+    font-weight: 500;
     cursor: pointer;
-  }
-  
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+}
+
+.btn-signin:hover {
+    color: #1e3a8a;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.btn-secondary {
+    background: none;
+    border: 2px solid #3b82f6;
+    color: #1e40af;
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.hamburger span {
+    width: 25px;
+    height: 3px;
+    background: #1e3a8a;
+    margin: 3px 0;
+    transition: 0.3s;
+}
   .word-container {
     color:white;
     display: flex;

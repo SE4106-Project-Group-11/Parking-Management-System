@@ -1,36 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Parking Management System</title>
-  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">  
-  <link rel="stylesheet" href="../../css/home/styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Management System Website</title>
+    <link rel="stylesheet" href="../../css/home/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <aside class="sidebar">
-      <div class="logo">
-        <div class="blue-bar"></div>
-      </div> 
-    </aside>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="logo-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <span class="brand-name">ParkingSys</span>
+            </div>
+            
+            <div class="nav-menu" id="nav-menu">
+                <a href="#hero" class="nav-link">Home</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
 
-    <main id="main" class="main-content">
-      <header class="navbar">
-        <ul>
-          <li><a href="#main">HOME</a></li>
-          <li><a href="#about-us">ABOUT US</a></li>
-          <li><a href="#features">FEATURES</a></li>
-          <li><a href="#how">HOW IT WORKS</a></li>
-        </ul>
-        <div id="button-line"> 
-          <div class="main-buttons"><a href="register.html">Register</a></div>
-          <div class="main-buttons"><a href="index.html">Log In</a></div> 
+            <div class="nav-buttons">
+                <button class="btn-primary">Sign In</button>
+                <button class="btn-primary">Get Started</button>
+            </div>
+
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
-      </header>
+    </nav>
 
       <section class="word-container">
         <div class="text reveal">
