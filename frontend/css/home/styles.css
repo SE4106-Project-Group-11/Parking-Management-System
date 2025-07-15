@@ -609,6 +609,23 @@ body {
     font-size: 1rem;
 }
 
+/* Footer */
+footer {
+  margin-top: 45px;
+  padding: 1rem 0;
+  text-align: center;
+  font-size: 16px;
+  color: #c6eff4;
+}
+
+.footer-nav a {
+  margin: 0 0.5rem;
+  color: #aaa;
+}
+
+.footer-nav a:hover {
+  color: #68b0f8;
+}
 
 
 
