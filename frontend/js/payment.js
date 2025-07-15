@@ -1,9 +1,7 @@
-
 // frontend/js/payment.js
 
-// --- GLOBAL UTILITY FUNCTIONS (Embedded directly in payment.js for guaranteed access) ---
-// These are copies from your script.js. If you prefer them global, ensure script.js correctly
-// defines them outside its DOMContentLoaded and is loaded BEFORE payment.js.
+// --- GLOBAL UTILITY FUNCTIONS (Defined outside DOMContentLoaded for universal access) ---
+// These are copies from your script.js or newly defined for payment.js's functionality.
 
 function showModal(contentHtml) {
     let modal = document.getElementById('dynamicModal');
@@ -94,13 +92,191 @@ function capitalizeFirstLetter(string) {
 
 // --- END GLOBAL UTILITY FUNCTIONS ---
 
+// --- GLOBAL VARIABLES (defined outside DOMContentLoaded to be accessible by all functions) ---
+let stripe = null;
+let elements = null;
+let cardElement = null;
+let stripeCardContainer = null;
+let cardErrors = null;
+let token = null;
+let userId = null;
+let userRole = null;
 
+
+// --- STRIPE INTEGRATION FUNCTIONS (moved to global scope) ---
+async function initializeStripe() {
+    console.log("Attempting to initialize Stripe.");
+    if (typeof Stripe === 'undefined') {
+        console.error("Stripe.js script not loaded!");
+        showNotification('Stripe payment methods not available. Check script.js in HTML.', 'error');
+        return;
+    }
+    if (!stripe) {
+        try {
+            stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // <<< IMPORTANT: Replace with your key
+            elements = stripe.elements();
+            cardElement = elements.create('card');
+            cardElement.mount('#card-element');
+            console.log("Stripe initialized and card element mounted.");
+
+            cardElement.addEventListener('change', function(event) {
+                if (cardErrors) {
+                    if (event.error) {
+                        cardErrors.textContent = event.error.message;
+                        console.error("Stripe card error:", event.error.message);
+                    } else {
+                        cardErrors.textContent = '';
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error initializing Stripe:', error);
+            showNotification('Error loading payment methods. Check Stripe key.', 'error');
+        }
+    } else {
+        console.log("Stripe already initialized.");
+        if(cardElement) cardElement.clear();
+    }
+}
+
+// --- CORE PAYMENT DATA LOADING FUNCTIONS (moved to global scope) ---
+async function loadUserPayments() {
+    console.log("Loading user payments...");
+    try {
+        const res = await fetch(`http://localhost:5000/api/payments/me`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await res.json();
+        console.log("Payments API response:", data);
+
+        if (res.ok && data.success) {
+            populatePaymentsTable(data.payments);
+        } else {
+            showNotification(data.message || 'Failed to load payments.', 'error');
+            console.error('Error loading payments:', data.message);
+        }
+    } catch (error) {
+        showNotification('Network error loading payments.', 'error');
+        console.error('Network error loading payments (catch):', error);
+    }
+}
+
+function populatePaymentsTable(payments) {
+    const tbody = document.getElementById('paymentsTable');
+    if (!tbody) { console.warn("Payments table body not found."); return; }
+    tbody.innerHTML = '';
+
+    if (!payments || payments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666;">No payments made yet.</td></tr>';
+        return;
+    }
+
+    payments.forEach(payment => {
+        const row = document.createElement('tr');
+        const paymentDate = new Date(payment.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+        console.log("DEBUG: Populating payment with _id:", payment._id, "as string:", String(payment._id), "and type:", typeof payment._id);
+
+        row.innerHTML = `
+            <td>${payment.transactionId || String(payment._id)}</td>
+            <td>${capitalizeFirstLetter(payment.paymentType)}</td>
+            <td>${capitalizeFirstLetter(payment.userType)}</td>
+            <td>${payment.userId}</td>
+            <td>LKR ${payment.amount.toFixed(2)}</td>
+            <td>${paymentDate}</td>
+            <td>${capitalizeFirstLetter(payment.mode)}</td>
+            <td>
+                <button class="btn btn-sm btn-info view-payment-btn" data-id="${String(payment._id)}">View</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    console.log("Payments table populated.");
+}
+
+// --- HELPER FUNCTION FOR SUBMIT BUTTON RESET (moved to global scope) ---
+function resetSubmitButton(btn, spinner, textSpan) {
+    if (spinner) spinner.style.display = 'none';
+    if (textSpan) textSpan.textContent = 'Pay Now';
+    if (btn) btn.disabled = false;
+    console.log("Submit button reset.");
+}
+
+// --- PAYMENT DETAILS MODAL DISPLAY FUNCTION (moved to global scope) ---
+function showPaymentDetailsModal(payment) {
+    const stripeResponse = payment.gatewayResponse;
+    const stripePiId = stripeResponse ? stripeResponse.id : 'N/A';
+    const stripeChargeId = stripeResponse && stripeResponse.latest_charge && stripeResponse.latest_charge.id ? stripeResponse.latest_charge.id : 'N/A';
+    const stripePmId = stripeResponse ? stripeResponse.payment_method : 'N/A';
+    const stripeStatus = stripeResponse ? stripeResponse.status : 'N/A';
+    const stripeCreatedDate = stripeResponse && stripeResponse.created ? formatDate(stripeResponse.created * 1000) : 'N/A';
+
+    const cardDetails = stripeResponse && stripeResponse.latest_charge && stripeResponse.latest_charge.payment_method_details && stripeResponse.latest_charge.payment_method_details.card
+                        ? stripeResponse.latest_charge.payment_method_details.card : null;
+
+    const modalContent = `
+        <div class="modal-header">
+            <h2>Payment Details</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="payment-details-view">
+                <h3>Transaction Overview</h3>
+                <p><strong>Payment ID:</strong> ${payment.transactionId || payment._id}</p>
+                <p><strong>Payment Type:</strong> ${capitalizeFirstLetter(payment.paymentType)}</p>
+                <p><strong>User Type:</strong> ${capitalizeFirstLetter(payment.userType)}</p>
+                <p><strong>User ID:</strong> ${payment.userId}</p>
+                <p><strong>Amount:</strong> LKR ${payment.amount ? payment.amount.toFixed(2) : '0.00'}</p>
+                <p><strong>Date:</strong> ${formatDate(payment.date)}</p>
+                <p><strong>Payment Mode:</strong> ${capitalizeFirstLetter(payment.mode)}</p>
+                <p><strong>Status:</strong> <span class="status-badge status-${payment.status || 'unknown'}">${capitalizeFirstLetter(payment.status || 'Unknown')}</span></p>
+
+                ${stripeResponse ? `
+                    <h3 style="margin-top: 20px;">Payment Gateway Reference</h3>
+                    <p><strong>Stripe Payment Intent ID:</strong> ${stripePiId}</p>
+                    <p><strong>Stripe Status:</strong> ${capitalizeFirstLetter(stripeStatus)}</p>
+                    ${cardDetails ? `
+                        <p><strong>Card Last 4:</strong> ${cardDetails.last4 || 'N/A'}</p>
+                    ` : ''}
+                ` : ''}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary close-modal">Close</button>
+        </div>
+    `;
+    showModal(modalContent);
+
+    // --- NEW: Add event listeners for the close buttons after modal content is loaded ---
+    const currentModal = document.getElementById('dynamicModal');
+    if (currentModal) {
+        const closeBtns = currentModal.querySelectorAll('.close-modal');
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                closeModal();
+            });
+        });
+
+        currentModal.addEventListener('click', function(event) {
+            if (event.target === currentModal) {
+                closeModal();
+            }
+        });
+    }
+    // --- END NEW EVENT LISTENERS ---
+}
+
+
+// --- DOMContentLoaded for page initialization and event listener attachment ---
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log("payment.js: DOMContentLoaded fired.");
-
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    const userRole = localStorage.getItem('userRole');
+    // Re-assign global variables from localStorage on DOMContentLoaded
+    token = localStorage.getItem('token'); // Removed const for global re-assignment
+    userId = localStorage.getItem('userId'); // Removed const
+    userRole = localStorage.getItem('userRole'); // Removed const
 
     if (!token || !userId || !userRole) {
         alert('Authentication required to view payments.');
@@ -108,110 +284,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
-    // --- STRIPE INTEGRATION SETUP ---
-    // Note: Stripe will not fully initialize if its script is not loaded in HTML
-    // or if the publishable key is invalid. Errors here will be caught by try/catch.
-    let stripe = null;
-    let elements = null;
-    let cardElement = null;
-    const stripeCardContainer = document.getElementById('stripeCardContainer');
-    const cardErrors = document.getElementById('card-errors');
+    // Initialize Stripe-related DOM elements once DOM is ready
+    // These need to be assigned after DOMContentLoaded because elements might not exist immediately
+    stripeCardContainer = document.getElementById('stripeCardContainer');
+    cardErrors = document.getElementById('card-errors');
 
-    async function initializeStripe() {
-        console.log("Attempting to initialize Stripe.");
-        if (typeof Stripe === 'undefined') {
-            console.error("Stripe.js script not loaded!");
-            showNotification('Stripe payment methods not available. Check script.js in HTML.', 'error');
-            return; // Exit if Stripe script is not ready
-        }
-        if (!stripe) {
-            try {
-                // IMPORTANT: Replace with your actual Stripe publishable key (pk_test_...)
-                // This key is safe to be in frontend code.
-                stripe = Stripe('pk_test_51RkTtcQBCT5aRlOBsQOWLfz7dcLVqkJ23KuIfze4K8YetPS8mIvx4bTd2e7GRtQ0kTcAuQbasAbWpznwewZQCDJL00YZ6pu6i4'); // <<< IMPORTANT: Replace with your key
-                elements = stripe.elements();
-                cardElement = elements.create('card');
-                cardElement.mount('#card-element');
-                console.log("Stripe initialized and card element mounted.");
-
-                cardElement.addEventListener('change', function(event) {
-                    if (cardErrors) {
-                        if (event.error) {
-                            cardErrors.textContent = event.error.message;
-                            console.error("Stripe card error:", event.error.message);
-                        } else {
-                            cardErrors.textContent = '';
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error('Error initializing Stripe:', error);
-                showNotification('Error loading payment methods. Check Stripe key.', 'error');
-            }
-        } else {
-            console.log("Stripe already initialized.");
-            if(cardElement) cardElement.clear();
-        }
-    }
-    // --- END STRIPE INTEGRATION SETUP ---
-
-
-    // --- Load User Payments from Backend ---
-    async function loadUserPayments() {
-        console.log("Loading user payments...");
-        try {
-            const res = await fetch(`http://localhost:5000/api/payments/me`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            const data = await res.json();
-            console.log("Payments API response:", data);
-
-            if (res.ok && data.success) {
-                populatePaymentsTable(data.payments);
-            } else {
-                showNotification(data.message || 'Failed to load payments.', 'error');
-                console.error('Error loading payments:', data.message);
-            }
-        } catch (error) {
-            showNotification('Network error loading payments.', 'error');
-            console.error('Network error loading payments (catch):', error);
-        }
-    }
-
-    function populatePaymentsTable(payments) {
-        const tbody = document.getElementById('paymentsTable');
-        if (!tbody) { console.warn("Payments table body not found."); return; }
-        tbody.innerHTML = '';
-
-        if (!payments || payments.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666;">No payments made yet.</td></tr>';
-            return;
-        }
-
-        payments.forEach(payment => {
-            const row = document.createElement('tr');
-            const paymentDate = new Date(payment.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-
-            row.innerHTML = `
-                <td>${payment.transactionId || payment._id}</td>
-                <td>${capitalizeFirstLetter(payment.paymentType)}</td>
-                <td>${capitalizeFirstLetter(payment.userType)}</td>
-                <td>${payment.userId}</td>
-                <td>LKR ${payment.amount.toFixed(2)}</td>
-                <td>${paymentDate}</td>
-                <td>${capitalizeFirstLetter(payment.mode)}</td>
-                <td>
-                    <button class="btn btn-sm btn-info view-payment-btn" data-id="${payment._id}">View</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-        console.log("Payments table populated.");
-    }
 
     // --- Handle "Make Payment" Modal & Submission Logic ---
 
@@ -223,22 +300,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             if(paymentIdField) paymentIdField.value = 'PMT' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
             document.getElementById('paymentType').value = '';
             document.getElementById('amount').value = '';
-            // paymentGateway selection will default to 'stripe'
-            document.getElementById('paymentGateway').value = 'stripe'; // Set default to stripe
+            document.getElementById('paymentGateway').value = 'stripe';
 
-            // Show Stripe container by default
             if(stripeCardContainer) stripeCardContainer.style.display = 'block';
             if(cardErrors) cardErrors.textContent = '';
 
-            // Initialize Stripe when modal opens, if not already
             await initializeStripe();
 
             resetSubmitButton(document.getElementById('submitPayment'), document.getElementById('submitPayment').querySelector('.fa-spinner'), document.getElementById('submitPayment').querySelector('span'));
         });
     }
 
-    // Handle Payment Gateway selection change (shows/hides Stripe card element)
-    // This listener is still useful if you decide to add other gateways back
     const paymentGatewaySelect = document.getElementById('paymentGateway');
     if (paymentGatewaySelect) {
         paymentGatewaySelect.addEventListener('change', async function() {
@@ -246,10 +318,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (this.value === 'stripe') {
                 if(stripeCardContainer) stripeCardContainer.style.display = 'block';
                 await initializeStripe();
-            } else { // This block will now effectively only hide Stripe if some other (non-Stripe) option is added later
+            } else {
                 if(stripeCardContainer) stripeCardContainer.style.display = 'none';
                 if(cardElement) cardElement.clear();
-                // Future: Handle other gateway specific UI here
             }
         });
     }
@@ -272,7 +343,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             const paymentType = document.getElementById('paymentType').value;
             const amount = parseFloat(document.getElementById('amount').value);
-            const selectedGateway = document.getElementById('paymentGateway').value; // Will be 'stripe'
+            const selectedGateway = document.getElementById('paymentGateway').value;
             const displayPaymentId = document.getElementById('paymentId').value;
 
             if (!paymentType || isNaN(amount) || amount <= 0 || !selectedGateway) {
@@ -284,12 +355,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.log("Client-side validation passed. Selected Gateway:", selectedGateway);
 
             try {
-                // Since selectedGateway defaults to 'stripe', this block will always execute
                 if (selectedGateway === 'stripe') {
                     console.log("Attempting Stripe payment.");
-                    if (!stripe || !cardElement) { // Re-check if Stripe is truly initialized
+                    if (!stripe || !cardElement) {
                         await initializeStripe();
-                        if (!stripe || !cardElement) { // Final check after re-initialization attempt
+                        if (!stripe || !cardElement) {
                             console.error("Stripe not properly initialized, cannot proceed with payment.");
                             showNotification('Payment service not ready. Please try again.', 'error');
                             resetSubmitButton(submitBtn, spinner, buttonText);
@@ -337,7 +407,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         showNotification(data.message || 'Payment failed.', 'error');
                     }
 
-                } else { // This block should theoretically not be hit as 'stripe' is default selected
+                } else {
                     console.warn("Unexpected payment gateway selected:", selectedGateway);
                     showNotification("An unexpected payment gateway was selected.", "error");
                 }
@@ -346,7 +416,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 console.error('Error processing payment (outer catch block):', err);
                 showNotification('An error occurred during payment processing. Please try again.', 'error');
             } finally {
-                // Always reset button unless there's an explicit redirect (which Stripe direct method doesn't do)
                 resetSubmitButton(submitBtn, spinner, buttonText);
             }
         });
@@ -370,44 +439,117 @@ document.addEventListener('DOMContentLoaded', async function() {
     // must be available in the global scope for payment.js to work.
     // If you copied them into script.js outside DOMContentLoaded, they should be fine.
     // Otherwise, copy them directly into payment.js (outside its DOMContentLoaded).
+
+    // --- NEW: Event listener for 'View' buttons in the payment history table ---
+    document.body.addEventListener('click', async function(e) {
+        if (e.target.classList.contains('view-payment-btn')) {
+            const paymentId = e.target.getAttribute('data-id'); // Get the MongoDB _id of the payment
+            console.log(`View button clicked for Payment ID: ${paymentId}`); // Debug Log
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/payments/${paymentId}`, { // Fetch single payment
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await res.json();
+                console.log("Single payment details API response:", data); // Debug Log
+
+                if (res.ok && data.success && data.payment) {
+                    showPaymentDetailsModal(data.payment); // Display details in a modal
+                } else {
+                    showNotification(data.message || 'Failed to load payment details.', 'error');
+                    console.error('Error loading single payment:', data.message);
+                }
+            } catch (error) {
+                showNotification('Network error loading payment details.', 'error');
+                console.error('Network error loading single payment (catch):', error);
+            }
+        }
+    });
+
+    // --- NEW: Function to display payment details in a modal ---
+    // frontend/js/payment.js
+
+// ... (previous functions and code) ...
+
+// --- Function to display payment details in a modal ---
+function showPaymentDetailsModal(payment) {
+    const stripeResponse = payment.gatewayResponse;
+    const stripePiId = stripeResponse ? stripeResponse.id : 'N/A';
+    const stripeChargeId = stripeResponse && stripeResponse.latest_charge && stripeResponse.latest_charge.id ? stripeResponse.latest_charge.id : 'N/A';
+    const stripePmId = stripeResponse ? stripeResponse.payment_method : 'N/A';
+    const stripeStatus = stripeResponse ? stripeResponse.status : 'N/A';
+    const stripeCreatedDate = stripeResponse && stripeResponse.created ? formatDate(stripeResponse.created * 1000) : 'N/A';
+
+    const cardDetails = stripeResponse && stripeResponse.latest_charge && stripeResponse.latest_charge.payment_method_details && stripeResponse.latest_charge.payment_method_details.card
+                            ? stripeResponse.latest_charge.payment_method_details.card : null;
+
+    const modalContent = `
+        <div class="modal-header">
+            <h2>Payment Details</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="payment-details-view">
+                <h3>Transaction Overview</h3>
+                <p><strong>Payment ID:</strong> ${payment.transactionId || payment._id}</p>
+                <p><strong>Payment Type:</strong> ${capitalizeFirstLetter(payment.paymentType)}</p>
+                <p><strong>User Type:</strong> ${capitalizeFirstLetter(payment.userType)}</p>
+                <p><strong>User ID:</strong> ${payment.userId}</p>
+                <p><strong>Amount:</strong> LKR ${payment.amount ? payment.amount.toFixed(2) : '0.00'}</p>
+                <p><strong>Date:</strong> ${formatDate(payment.date)}</p>
+                <p><strong>Payment Mode:</strong> ${capitalizeFirstLetter(payment.mode)}</p>
+                <p><strong>Status:</strong> <span class="status-badge status-${payment.status || 'unknown'}">${capitalizeFirstLetter(payment.status || 'Unknown')}</span></p>
+
+                ${stripeResponse ? `
+                    <h3 style="margin-top: 20px;">Payment Gateway Reference</h3>
+                    <p><strong>Stripe Payment Intent ID:</strong> ${stripePiId}</p>
+                    <p><strong>Stripe Status:</strong> ${capitalizeFirstLetter(stripeStatus)}</p>
+                    ${cardDetails ? `
+                        <p><strong>Card Last 4:</strong> ${cardDetails.last4 || 'N/A'}</p>
+                    ` : ''}
+                ` : ''}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary close-modal">Close</button>
+        </div>
+    `;
+    showModal(modalContent); // Use the global showModal function
+
+    // >>>>>> NEW DEBUGGING AND ROBUST LISTENER ATTACHMENT FOR MODAL CLOSE <<<<<<
+    const currentModalElement = document.getElementById('dynamicModal'); // Get the modal that was just opened
+    console.log("DEBUG: showPaymentDetailsModal - currentModalElement:", currentModalElement); // Debug Log
+
+    if (currentModalElement) {
+        // Attach listener to 'x' button and 'Close' button within THIS specific modal
+        const closeBtns = currentModalElement.querySelectorAll('.close-modal');
+        console.log("DEBUG: showPaymentDetailsModal - Found close buttons:", closeBtns.length); // Debug Log
+        
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                console.log("DEBUG: Close button clicked. Calling closeModal()."); // Debug Log
+                closeModal(); // Call your closeModal function
+            });
+        });
+
+        // Attach listener for clicking outside the modal content
+        currentModalElement.addEventListener('click', function(event) {
+            // Check if the click was directly on the modal overlay (not its content)
+            const modalContent = currentModalElement.querySelector('.modal-content');
+            if (modalContent && !modalContent.contains(event.target)) {
+                 console.log("DEBUG: Click outside modal content. Calling closeModal()."); // Debug Log
+                closeModal();
+            }
+        });
+    } else {
+        console.warn("DEBUG: showPaymentDetailsModal - dynamicModal not found after showModal. Cannot attach close listeners."); // Debug Warning
+    }
+    // >>>>>> END NEW DEBUGGING AND ROBUST LISTENER ATTACHMENT <<<<<<
+}
 });
 
-// Okay, I have your `payment.js` code again. You're confirming it's the correct file.
-
-// My previous response (where I provided the full payment code for Stripe only) should be complete for Stripe integration.
-
-// **The next step is to actually try to make a payment with a Stripe test card and observe the console and network output.**
-
-// To clarify, my previous response from **[Sunday, July 13, 2025 at 11:18:54 PM +0530]** provided the full, corrected code for:
-// 1.  `frontend/pages/employee/payment-management.html`
-// 2.  `frontend/js/payment.js`
-// 3.  `backend/routes/payment.js`
-// 4.  `backend/controllers/paymentController.js`
-// 5.  And also reminded you about the `.env` and `npm install stripe` steps.
-
-// You should have replaced the content of all these files with the code provided in that response.
-
-// **Now, please follow these steps precisely to test the Stripe integration:**
-
-// 1.  **Ensure your backend server is running cleanly.** (No errors in the terminal after `nodemon app.js`).
-// 2.  **Clear your browser cache** (`Ctrl+Shift+R` or `Cmd+Shift+R`) to ensure you load the latest frontend code.
-// 3.  **Go to your payment management page** (`http://localhost:5000/pages/employee/payment-management.html` or your dummy domain).
-// 4.  **Open your browser's Developer Tools (`F12`) and go to the "Console" tab.**
-// 5.  **Open the "Make Payment" modal.**
-// 6.  Fill in the details:
-//     * **Payment Type:** Choose "Permit" or "Violation".
-//     * **Amount (LKR):** Enter `1000`.
-//     * **Choose Payment Gateway:** It should already be selected as "Stripe (Card)".
-//     * **Credit or Debit Card:** **Use a Stripe test card number.** For example, for a successful Visa payment, use:
-//         * **Card Number:** `4242 4242 4242 4242`
-//         * **Expiry Date:** Any future date (e.g., `12/25`)
-//         * **CVC:** `123`
-// 7.  **Click the "Pay Now" button.**
-
-// **After clicking "Pay Now", please provide:**
-
-// * **A screenshot of your browser's Console tab** (scrolled down to capture all new messages).
-// * **A screenshot of your browser's Network tab** (showing the `process-stripe-payment` request and its status/response).
-
-// This will show us the success or any new errors with the Stripe integration.
-
+// this is frontend payment.js file and make changes properly
