@@ -3,31 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Management - Employee Panel</title>
+    <title>Payment Management - Admin Panel</title>
     <link rel="stylesheet" href="../../css/style.css">
-    <link rel="stylesheet" href="../../css/employee.css">
+    <link rel="stylesheet" href="../../css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-parking"></i>
-                <h2>Employee Panel</h2>
+                <h2>Nonemployee Panel</h2>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> My Permits </a></li>
-                <li><a href="violations.html"><i class="fas fa-exclamation-triangle"></i> My Violations </a> </li>
+                <li> <a href="violations.html" class="active"><i class="fas fa-exclamation-triangle"></i> My Violations </a> </li>
                 <li><a href="qrcode.html"> <i class="fas fa-qrcode"></i> My QR Code </a></li>
                 <li><a href="payment-management.html" class="active"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
                 <li><a href="../../index.html" class="logout-btn"> <i class="fas fa-sign-out-alt"></i> Logout </a> </li>
             </ul>
         </aside>
 
+        <!-- Mobile Sidebar Toggle -->
         <button id="sidebarToggle" class="sidebar-toggle">
             <i class="fas fa-bars"></i>
         </button>
 
+        <!-- Main Content Area -->
         <main class="main-content">
             <div class="top-bar">
                 <h1>Payment Management</h1>
@@ -38,6 +41,8 @@
                 </div>
             </div>
 
+           
+            <!-- Payments Table -->
             <div class="card">
                 <div class="card-header">
                     <h2>Payment Records</h2>
@@ -57,13 +62,15 @@
                             </tr>
                         </thead>
                         <tbody id="paymentsTable">
-                            </tbody>
+                            
+                        </tbody>
                     </table>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Add Payment Modal -->
     <div id="addPaymentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -71,10 +78,7 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
-
-                <form id="paymentForm" novalidate>
-
-
+                <form id="paymentForm">
                     <div class="form-group">
                         <label for="paymentId">Payment ID</label>
                         <input type="text" id="paymentId" class="form-control" readonly>
@@ -89,41 +93,60 @@
                         <small class="form-text error-message" id="paymentTypeError"></small>
                     </div>
                     <div class="form-group">
-                        <label for="amount">Amount (LKR) <span class="required">*</span></label>
-                        <input type="number" id="amount" class="form-control" step="0.01" min="0" required>
-                        <small class="form-text error-message" id="amountError"></small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="paymentGateway">Choose Payment Gateway <span class="required">*</span></label>
-                        <select id="paymentGateway" class="form-control" required>
-                            <option value="stripe" selected>Stripe (Card)</option>
+                        <label for="userType">User Type <span class="required">*</span></label>
+                        <select id="userType" class="form-control" required>
+                            <option value="">Select User Type</option>
+                            <option value="employee">Employee</option>
+                            <option value="nonemployee">Non-Employee</option>
+                            <option value="visitor">Visitor</option>
                         </select>
-                        <small class="form-text error-message" id="paymentGatewayError"></small>
+                        <small class="form-text error-message" id="userTypeError"></small>
                     </div>
-
-                    <div id="stripeCardContainer" class="form-group">
-                        <label>Credit or Debit Card</label>
-                        <div id="card-element" class="form-control" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                            </div>
-                        <div id="card-errors" role="alert" style="color: red; margin-top: 5px;"></div>
+                    <div class="form-group">
+                        <label for="userId">User ID <span class="required">*</span></label>
+                        <input type="text" id="userId" class="form-control" required>
+                        <small class="form-text error-message" id="userIdError"></small>
                     </div>
-
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary close-modal" id="cancelPayment">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="submitPayment">
-                            <span>Pay Now</span>
-                            <i class="fas fa-spinner fa-spin" style="display: none;"></i>
-                        </button>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="amount">Amount (LKR) <span class="required">*</span></label>
+                            <input type="number" id="amount" class="form-control" step="0.01" min="0" required>
+                            <small class="form-text error-message" id="amountError"></small>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="paymentDate">Payment Date <span class="required">*</span></label>
+                            <input type="date" id="paymentDate" class="form-control date-picker" required>
+                            <small class="form-text error-message" id="paymentDateError"></small>
+                        </div>
                     </div>
+                    <div class="form-group">
+                        <label for="paymentMode">Payment Mode <span class="required">*</span></label>
+                        <select id="paymentMode" class="form-control" required>
+                            <option value="">Select Payment Mode</option>
+                            <option value="paypal">Paypal</option>
+                            <option value="card">Card</option>
+                        </select>
+                        <small class="form-text error-message" id="paymentModeError"></small>
+                    </div>
+                    <div class="form-group" id="cardDetailsSection" style="display: none;">
+                        <label for="cardNumber">Card Number <span class="required">*</span></label>
+                        <input type="text" id="cardNumber" class="form-control" placeholder="XXXX-XXXX-XXXX-XXXX">
+                        <small class="form-text error-message" id="cardNumberError"></small>
+                    </div>
+                    
                 </form>
-
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelPayment">Cancel</button>
+                <button class="btn btn-primary" id="submitPayment">
+                    <span>Submit Payment</span>
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                </button>
+            </div>
         </div>
     </div>
 
-    <script src="https://js.stripe.com/v3/"></script>
     <script src="../../js/script.js"></script>
     <script src="../../js/payment.js"></script>
 </body>
-</html>
+</html> 
