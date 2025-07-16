@@ -1,24 +1,38 @@
 // backend/routes/payment.js
+
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, requireAdmin } = require('../utils/authMiddleware');
-// Import only Stripe-related controller functions (and general ones)
-const { createPayment, getMyPayments, getAllPayments, processStripePayment } = require('../controllers/paymentController'); // <<< CORRECTED IMPORTS
 
-// POST /api/payments        → any logged in user (for direct payment recording)
+const { authenticateToken, requireAdmin } = require('../utils/authMiddleware');
+
+// Import controller functions
+const {
+  createPayment,
+  getMyPayments,
+  getAllPayments,
+  processStripePayment,
+  getPaymentById
+} = require('../controllers/paymentController');
+
+// ---------------------------------------------
+// POST /api/payments
+// Create a payment (any logged-in user)
 router.post('/', authenticateToken, createPayment);
 
-// POST /api/payments/process-stripe-payment → Handle Stripe payment gateway charges
-router.post('/process-stripe-payment', authenticateToken, processStripePayment); // <<< THIS IS THE CORRECT ROUTE
+// POST /api/payments/process-stripe-payment
+// Process Stripe payment
+router.post('/process-stripe-payment', authenticateToken, processStripePayment);
 
-// REMOVED Payhere-specific routes:
-// router.post('/initiate-payhere-payment', authenticateToken, initiatePayherePayment);
-// router.post('/payhere-notify', handlePayhereIPN);
-
-// GET  /api/payments/me      → that user’s payments
+// GET /api/payments/me
+// Get payments for the logged-in user
 router.get('/me', authenticateToken, getMyPayments);
 
-// GET  /api/payments         → admin only
+// GET /api/payments
+// Admin: Get all payments
 router.get('/', authenticateToken, requireAdmin, getAllPayments);
+
+// GET /api/payments/:id
+// Get payment by ID — must be last to avoid route conflicts
+router.get('/:id', authenticateToken, getPaymentById);
 
 module.exports = router;

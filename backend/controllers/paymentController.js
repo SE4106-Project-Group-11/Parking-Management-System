@@ -1,15 +1,16 @@
 // backend/controllers/paymentController.js
 const Payment = require('../models/Payment');
 
-// --- CRITICAL CHECK: Ensure Stripe Secret Key is loaded ---
-if (!process.env.STRIPE_SECRET_KEY) {
-    console.error("CRITICAL ERROR: STRIPE_SECRET_KEY is not set in .env!");
-    // You might want to throw an error here to prevent server startup
-    // throw new Error("STRIPE_SECRET_KEY is not defined. Please check your .env file.");
+// --- CRITICAL CHECK: Ensure STRIPE_SECRET_KEY is loaded and valid ---
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeSecretKey || stripeSecretKey === 'sk_test_YOUR_STRIPE_SECRET_KEY_HERE') {
+    console.error("CRITICAL ERROR: STRIPE_SECRET_KEY is not set or is still the placeholder in .env!");
+    // Throw an error to prevent the server from starting with a misconfigured Stripe key
+    throw new Error("STRIPE_SECRET_KEY is not defined or is a placeholder. Please check your .env file.");
 }
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // <<< THIS LINE USES THE KEY FROM .ENV
+const stripe = require('stripe')(stripeSecretKey); // Use the validated key
 
-// For fetching user details (used in Payhere logic, but good to keep if you still fetch user info)
+// For fetching user details (Employee, Visitor, NonEmployee models)
 const Employee = require('../models/Employee');
 const Visitor = require('../models/Visitor');
 const NonEmployee = require('../models/NonEmployee');
@@ -62,7 +63,6 @@ exports.getAllPayments = async (req, res) => {
     }
 };
 
-// --- Function to process Stripe payments ---
 exports.processStripePayment = async (req, res) => {
     const { paymentMethodId, amount, paymentType, displayPaymentId } = req.body;
     const userId = req.user.id;
@@ -73,7 +73,6 @@ exports.processStripePayment = async (req, res) => {
     }
 
     try {
-        // This is where the error 'Invalid API key provided' happens if process.env.STRIPE_SECRET_KEY is wrong
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount, // Amount in cents/lowest currency unit
             currency: 'lkr', // Use LKR or your desired currency
@@ -81,7 +80,7 @@ exports.processStripePayment = async (req, res) => {
             confirmation_method: 'automatic',
             confirm: true,
             description: `Payment for ${paymentType} by ${userRole} (ID: ${userId}) - ${displayPaymentId}`,
-            return_url: 'http://localhost:5000/pages/employee/payment-management.html' // <<< IMPORTANT: Use your actual frontend URL for success
+            return_url: 'http://localhost:5000/pages/employee/payment-management.html' // Adjust if using dummy domain or live
         });
 
         if (paymentIntent.status === 'succeeded') {
@@ -120,6 +119,8 @@ exports.processStripePayment = async (req, res) => {
     }
 };
 
+
 // Removed: exports.initiatePayherePayment and exports.handlePayhereIPN (as per previous instructions for Stripe-only)
+
 
 
