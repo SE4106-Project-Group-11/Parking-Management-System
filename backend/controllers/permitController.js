@@ -58,15 +58,34 @@ exports.getMyPermits = async (req, res) => {
   }
 };
 
+// Get all permits (for Admin)
 exports.getAllPermits = async (req, res) => {
-  try {
-    const permits = await Permit.find().populate({
-        path: 'userId',
-        select: 'name email empID'
-    }).sort('-createdAt');
-    res.json({ success: true, permits });
-  } catch (err) {
-    console.error('getAllPermits error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
+    try {
+        const permits = await Permit.find();
+        res.status(200).json(permits);
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch permits.' });
+    }
+};
+
+// Approve permit
+exports.approvePermit = async (req, res) => {
+    const { permitId } = req.params;
+    try {
+        await Permit.findByIdAndUpdate(permitId, { status: 'Approved' });
+        res.json({ message: 'Permit approved successfully.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error approving permit.' });
+    }
+};
+
+// Reject permit
+exports.rejectPermit = async (req, res) => {
+    const { permitId } = req.params;
+    try {
+        await Permit.findByIdAndUpdate(permitId, { status: 'Rejected' });
+        res.json({ message: 'Permit rejected successfully.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error rejecting permit.' });
+    }
 };

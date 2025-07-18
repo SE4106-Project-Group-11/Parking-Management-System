@@ -91,13 +91,14 @@
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Sample data
+    // Sample data 
+    /*
     const permitRequests = [
         {
             employeeId: '', name: '',vehicleNo: '',requestDate: '', status: ''
         }
     ];
-
+*/
     // Sample user data for search functionality
     const users = [
         {
@@ -108,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sample violations data
     const violations = [
         {
-            id: '',vehicleNo: '',date: '', violationType: '', fineAmount: 45, userType: '', userId: ''
+            id: '',vehicleNo: '',date: '', violationType: '', fineAmount: '', userType: '', userId: ''
         }
     ];
 
@@ -164,83 +165,110 @@ document.addEventListener('DOMContentLoaded', function() {
         setupModalControls(); // Initialize modal controls
     }
 
-    // Function to populate the permit requests table
-    function populatePermitRequestsTable() {
-        const tableBody = document.getElementById('permitRequestsTable');
-        if (!tableBody) return;
+    let permitRequests = [];
 
-        tableBody.innerHTML = '';
-
-        permitRequests.forEach(permit => {
-            const row = document.createElement('tr');
-            
-            row.innerHTML = `
-                <td>${permit.employeeId}</td>
-                <td>${permit.name}</td>
-                <td>${permit.vehicleNo}</td>
-                <td>${permit.requestDate}</td>
-                <td><span class="status-badge ${permit.status}">${permit.status}</span></td>
-                <td class="btn-actions">
-                    ${permit.status === 'pending' ? 
-                        `<button class="btn btn-primary btn-sm approve-btn" data-id="${permit.employeeId}">Approve</button>
-                         <button class="btn btn-danger btn-sm reject-btn" data-id="${permit.employeeId}">Reject</button>` : 
-                        `<button class="btn btn-primary btn-sm view-btn" data-id="${permit.employeeId}">View</button>`
-                    }
-                </td>
-            `;
-            
-            tableBody.appendChild(row);
+function initAdminDashboard() {
+    fetch('/api/permits/all') // This is the key fetch from backend
+        .then(response => response.json())
+        .then(data => {
+            permitRequests = data;
+            populatePermitRequestsTable();
+            updateStatusCounts();
+        })
+        .catch(error => {
+            console.error('Error fetching permit requests:', error);
         });
+}
 
-        // Add event listeners for the approve/reject buttons
-        document.querySelectorAll('.approve-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const employeeId = this.getAttribute('data-id');
-                approvePermitRequest(employeeId);
-            });
-        });
-        document.querySelectorAll('.reject-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const employeeId = this.getAttribute('data-id');
-                rejectPermitRequest(employeeId);
-            });
-        });
-    }
+// Function to populate the permit requests table
+function populatePermitRequestsTable() {
+    const tableBody = document.getElementById('permitRequestsTable');
+    if (!tableBody) return;
 
-    // Function to update the status counts
-    function updateStatusCounts() {
-        const pendingCount = permitRequests.filter(permit => permit.status === 'pending').length;
-        const approvedCount = permitRequests.filter(permit => permit.status === 'approved').length;
-        const pendingCountEl = document.getElementById('pendingCount');
-        const approvedCountEl = document.getElementById('approvedCount');
+    tableBody.innerHTML = '';
+
+    permitRequests.forEach(permit => {
+        const row = document.createElement('tr');
         
-        if (pendingCountEl) pendingCountEl.textContent = pendingCount;
-        if (approvedCountEl) approvedCountEl.textContent = approvedCount;
-    }
+        row.innerHTML = `
+            <td>${permit.userId}</td>
+            <td>${permit.userType}</td>
+            <td>${permit.vehicleNumber}</td>
+            <td>${new Date(permit.validFrom).toLocaleDateString()} - ${new Date(permit.validTo).toLocaleDateString()}</td>
+            <td><span class="status-badge ${permit.status}">${permit.status}</span></td>
+            <td class="btn-actions">
+                ${permit.status === 'Pending' ? 
+                    `<button class="btn btn-primary btn-sm approve-btn" data-id="${permit._id}">Approve</button>
+                     <button class="btn btn-danger btn-sm reject-btn" data-id="${permit._id}">Reject</button>` : 
+                    `<button class="btn btn-primary btn-sm view-btn" data-id="${permit._id}">View</button>`
+                }
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
 
-    // Function to approve a permit request
-    function approvePermitRequest(employeeId) {
-        const permitIndex = permitRequests.findIndex(permit => permit.employeeId === employeeId);
-        if (permitIndex !== -1) {
-            permitRequests[permitIndex].status = 'approved';
-            showNotification(`Permit for ${permitRequests[permitIndex].name} approved successfully.`, 'success');
-            
-            // Refresh the dashboard
-            initAdminDashboard();
-        }
-    }
+    // Add event listeners for the approve/reject buttons
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const permitId = this.getAttribute('data-id');
+            approvePermitRequest(permitId);
+        });
+    });
+    document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const permitId = this.getAttribute('data-id');
+            rejectPermitRequest(permitId);
+        });
+    });
+}
 
-    // Function to reject a permit request
-    function rejectPermitRequest(employeeId) {
-        const permitIndex = permitRequests.findIndex(permit => permit.employeeId === employeeId);
-        if (permitIndex !== -1) {
-            permitRequests[permitIndex].status = 'rejected';
-            showNotification(`Permit for ${permitRequests[permitIndex].name} rejected.`, 'error');
-            
-            // Refresh the dashboard
-            initAdminDashboard();
-        }
-    }
+// Function to update the status counts
+function updateStatusCounts() {
+    const pendingCount = permitRequests.filter(p => p.status === 'Pending').length;
+    const approvedCount = permitRequests.filter(p => p.status === 'Approved').length;
+    
+    const pendingCountEl = document.getElementById('pendingCount');
+    const approvedCountEl = document.getElementById('approvedCount');
+    
+    if (pendingCountEl) pendingCountEl.textContent = pendingCount;
+    if (approvedCountEl) approvedCountEl.textContent = approvedCount;
+}
+
+// Function to approve a permit request
+function approvePermitRequest(permitId) {
+    fetch(`/api/permits/approve/${permitId}`, {
+        method: 'PATCH'
+    })
+    .then(res => res.json())
+    .then(data => {
+        showNotification(data.message, 'success');
+        initAdminDashboard(); // Refresh dashboard
+    })
+    .catch(err => {
+        console.error('Approval failed:', err);
+    });
+}
+
+// Function to reject a permit request
+function rejectPermitRequest(permitId) {
+    fetch(`/api/permits/reject/${permitId}`, {
+        method: 'PATCH'
+    })
+    .then(res => res.json())
+    .then(data => {
+        showNotification(data.message, 'error');
+        initAdminDashboard(); // Refresh dashboard
+    })
+    .catch(err => {
+        console.error('Rejection failed:', err);
+    });
+}
+
+// Utility: Show Notification
+function showNotification(message, type) {
+    alert(`${type.toUpperCase()}: ${message}`);
+}
 
     // Setup search functionality
     function setupSearchFunctionality() {
