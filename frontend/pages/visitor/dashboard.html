@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Panel - Parking Management System</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/visitor.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Visitor Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="dashboard.html" class="active">
+                        <i class="fas fa-tachometer-alt"></i> My Permit
+                    </a>
+                </li>
+                <li>
+                    <a href="violations.html">
+                        <i class="fas fa-exclamation-triangle"></i> Violations
+                    </a>
+                </li>
+                <li>
+                    <a href="qrcode.html">
+                        <i class="fas fa-qrcode"></i> My QR Code
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>Visitor Parking Permit</h1>
+                <div class="user-info">
+                    <span>John Visitor</span>
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Current Permit Status Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Current Permit Status</h2>
+                </div>
+                <div class="card-body">
+                    <div class="permit-status">
+                        <span class="status-badge status-active">Active until 2025-03-16 (3 days remaining)</span>
+                        <p class="permit-detail"><strong>Permit ID:</strong> VP-789012</p>
+                        <p class="permit-detail"><strong>Vehicle:</strong> XYZ789 (Sedan)</p>
+                        <p class="permit-detail"><strong>Issued On:</strong> 2025-03-14</p>
+                        <p class="permit-detail"><strong>Valid Until:</strong> 2025-03-16</p>
+                        <p class="permit-detail"><strong>Assigned Slot:</strong> B05</p>
+                        <p class="permit-detail"><strong>Purpose of Visit:</strong> Meeting with HR Department</p>
+                    </div>
+                    <div class="permit-actions">
+                        <button class="btn btn-primary" data-modal-target="qrCodeModal">
+                            <i class="fas fa-qrcode"></i> View QR Code
+                        </button>
+                        <button class="btn btn-secondary" data-modal-target="extendStayModal">
+                            <i class="fas fa-calendar-plus"></i> Extend Stay
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+              <!-- Violations Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Violations</h2>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Vehicle No.</th>
+                                <th>Violation</th>
+                                <th>Fine Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2025-03-15</td>
+                                <td>XYZ789</td>
+                                <td>Improper parking</td>
+                                <td>$20.00</td>
+                                <td><span class="status-badge status-pending">Pending</span></td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" data-violation-id="V002">Pay Fine</button>
+                                    <button class="btn btn-secondary btn-sm" data-violation-id="V002">Dispute</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrCodeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Your Permit QR Code</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-code-container">
+                    <!-- Placeholder for QR code -->
+                    <div class="qr-code-placeholder">
+                        <img id="qrCodeImage" 
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VP-789012" 
+                            alt="Permit QR Code"
+                            data-user-id="VP-789012"
+                            data-user-name="John Visitor"
+                            data-user-type="visitor"
+                            data-vehicle="XYZ789"
+                            data-purpose="Meeting with HR Department">
+                    </div>
+                    <div class="qr-info">
+                        <p><strong>Permit ID:</strong> VP-789012</p>
+                        <p><strong>Vehicle:</strong> XYZ789</p>
+                        <p><strong>Valid Until:</strong> 2025-03-16</p>
+                    </div>
+                </div>
+                <div class="qr-instructions">
+                    <p><i class="fas fa-info-circle"></i> Show this QR code at the parking entrance and exit gates for scanning.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="printQRCode">Print QR Code</button>
+                <button class="btn btn-secondary" id="downloadQRCode">Download QR Code</button>
+                <button class="btn btn-secondary close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extend Stay Modal -->
+    <div id="extendStayModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Extend Your Stay</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="extendStayForm">
+                    <div class="form-group">
+                        <label for="currentEndDate">Current End Date</label>
+                        <input type="text" id="currentEndDate" class="form-control" value="2025-03-16" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="newEndDate">New End Date</label>
+                        <input type="date" id="newEndDate" class="form-control date-picker" min="2025-03-17" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="extensionReason">Reason for Extension</label>
+                        <textarea id="extensionReason" class="form-control" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button class="btn btn-primary" id="submitExtension">Submit Request</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/script.js"></script>
+
+    <script>
+        const role = localStorage.getItem('userRole');
+        const allowedRole = 'visitor'; 
+
+        if (role !== allowedRole) {
+            alert('Access denied.');
+            window.location.href = 'index.html';
+        }
+    </script>
+
+</body>
+</html> 
