@@ -379,14 +379,220 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Public parking link handling (from index.html)
-    const publicParkingLink = document.getElementById('publicParkingLink');
-    if (publicParkingLink) {
-        publicParkingLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.location.href = 'Home.html';
+       
+    // ===== NEW VIOLATION FUNCTIONALITY =====
+    
+    // Load user violations when on violations page
+    if (window.location.pathname.includes('violations.html')) {
+        loadUserViolations();
+    }
+
+    // Function to load violations for the current user
+    async function loadUserViolations() {
+  const userId   = localStorage.getItem('userId');
+  const userRole = localStorage.getItem('userRole');
+  const token    = localStorage.getItem('token');
+
+  if (!userId || !token) return showViolationError('Please log in.');
+
+  const res = await fetch(
+    `http://localhost:5000/api/violations/user/${userId}?userType=${userRole}`,
+    {
+      headers: { 'Authorization': `Bearer ${token}` }
+    }
+  );
+
+            
+  const data = await res.json();
+  if (data.success) {
+    populateViolationsTable(data.violations);
+    updateViolationStats(data.violations);
+  } else {
+    showViolationError(data.error);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (location.pathname.endsWith('violations.html')) {
+    loadUserViolations();
+  }
+});
+
+    // Function to populate violations table
+    function populateViolationsTable(violations) {
+  const tbody = document.querySelector('.data-table tbody');
+  tbody.innerHTML = '';
+
+  if (violations.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6">No violations found.</td></tr>';
+    return;
+  }
+
+  violations.forEach(v => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatDate(v.date)}</td>
+      <td>${v.vehicleNo}</td>
+      <td>${v.violationType}</td>
+      <td>$${v.fineAmount.toFixed(2)}</td>
+      <td>${capitalizeFirstLetter(v.status || 'pending')}</td>
+      <td>
+        ${v.status === 'pending'
+          ? `<button onclick="acknowledgeViolation('${v._id}')">Ack</button>
+             <button onclick="resolveViolation('${v._id}')">Resolve</button>`
+          : `<span>—</span>`
+        }
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+    // Function to update violation statistics
+    function updateViolationStats(violations) {
+        const stats = {
+            total: violations.length,
+            pending: violations.filter(v => !v.status || v.status === 'pending').length,
+            acknowledged: violations.filter(v => v.status === 'acknowledged').length,
+            resolved: violations.filter(v => v.status === 'resolved' || v.resolved).length
+        };
+
+        // Update stats in UI if elements exist
+        const totalElement = document.getElementById('totalViolations');
+        const pendingElement = document.getElementById('pendingViolations');
+        const acknowledgedElement = document.getElementById('acknowledgedViolations');
+        const resolvedElement = document.getElementById('resolvedViolations');
+
+        if (totalElement) totalElement.textContent = stats.total;
+        if (pendingElement) pendingElement.textContent = stats.pending;
+        if (acknowledgedElement) acknowledgedElement.textContent = stats.acknowledged;
+        if (resolvedElement) resolvedElement.textContent = stats.resolved;
+    }
+
+    //resolve
+    async function resolveViolation(id) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`http://localhost:5000/api/violations/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ status: 'resolved' })
+  });
+  const data = await res.json();
+  if (data.success) loadUserViolations();
+}
+
+
+    // Global functions for violation actions
+    window.acknowledgeViolation = async function(violationId) {
+        await updateViolationStatus(violationId, 'acknowledged');
+    };
+
+    window.resolveViolation = async function(violationId) {
+        await updateViolationStatus(violationId, 'resolved');
+    };
+
+    // Function to update violation status
+    async function updateViolationStatus(violationId, status) {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            showNotification('Authentication required', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/violations/${violationId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                showNotification(`Violation ${status} successfully!`, 'success');
+                // Reload violations to show updated status
+                loadUserViolations();
+            } else {
+                throw new Error(data.error || 'Failed to update status');
+            }
+        } catch (error) {
+            console.error('Error updating violation status:', error);
+            showNotification('Failed to update violation status', 'error');
+        }
+    }
+
+    // Helper function to show violation loading error
+    function showViolationError(message) {
+        const tableBody = document.querySelector('.data-table tbody');
+        
+        const errorHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">
+                    <div style="color: #e74c3c;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        <h3 style="margin: 0 0 1rem 0;">Error Loading Violations</h3>
+                        <p style="margin: 0 0 1rem 0;">${message}</p>
+                        <button class="btn btn-primary" onclick="loadUserViolations()">Retry</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        if (tableBody) {
+            tableBody.innerHTML = errorHTML;
+        }
+    }
+
+    // ===== END VIOLATION FUNCTIONALITY =====
+
+    // Dynamic Violations Table Rendering (for all dashboards)
+    const violationsData = [
+        {
+            date: '',
+            vehicle: '',
+            description: '',
+            fine: 5.00,
+            status: ''
+        }
+       
+    ];
+
+    function renderViolationsTable(tableSelector, data) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        data.forEach((v, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${v.date}</td>
+                <td>${v.vehicle}</td>
+                <td>${v.description}</td>
+                <td>$${v.fine.toFixed(2)}</td>
+                <td><span class="status-badge status-pending">Pending</span></td>
+                <td>
+                    <button class="btn btn-primary btn-sm pay-fine-btn" data-index="${idx}">Pay Fine</button>
+                    <button class="btn btn-secondary btn-sm dispute-btn" data-index="${idx}">Dispute</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
     }
+
+    // Render violations if table exists
+    renderViolationsTable('.card .data-table', violationsData);
 
     // Registration link handling (from index.html)
     const registerLink = document.getElementById('registerLink');
@@ -394,6 +600,14 @@ document.addEventListener('DOMContentLoaded', () => {
         registerLink.addEventListener('click', function(e) {
             e.preventDefault();
             window.location.href = 'register.html';
+        });
+    }
+// Public parking link handling (from index.html)
+    const publicParkingLink = document.getElementById('publicParkingLink');
+    if (publicParkingLink) {
+        publicParkingLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'Home.html';
         });
     }
 }); // End of DOMContentLoaded

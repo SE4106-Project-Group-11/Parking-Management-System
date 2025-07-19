@@ -227,7 +227,6 @@ function populatePermitRequestsTable() {
 function updateStatusCounts() {
     const pendingCount = permitRequests.filter(p => p.status === 'Pending').length;
     const approvedCount = permitRequests.filter(p => p.status === 'Approved').length;
-    
     const pendingCountEl = document.getElementById('pendingCount');
     const approvedCountEl = document.getElementById('approvedCount');
     
@@ -570,7 +569,8 @@ function showNotification(message, type) {
 }      
         // Update violations table if it exists
         updateViolationsTable();
-    
+
+        
     // Update violations table
     function updateViolationsTable() {
         const violationsTable = document.getElementById('violationsTable');
@@ -586,7 +586,7 @@ function showNotification(message, type) {
                 <td>${violation.vehicleNo}</td>
                 <td>${violation.date}</td>
                 <td>${violation.violationType}</td>
-                <td>$${violation.fineAmount.toFixed(2)}</td>
+                <td>$${(parseFloat(violation.fineAmount) || 0).toFixed(2)}</td>
                 <td>${capitalizeFirstLetter(violation.userType)}</td>
                 <td>${violation.userId}</td>
                 <td class="btn-actions">
@@ -709,6 +709,10 @@ function showNotification(message, type) {
         
         updateViolationsTable();
     }    
+
+    //openmodel
+    window.openViolationModal = openViolationModal;
+    
     // Open modal
     function openModal(htmlOrId) {
         let modal = document.querySelector('.modal');
@@ -1933,4 +1937,6 @@ function showNotification(message, type) {
             });
         });
     }
+    
+
 }); 
