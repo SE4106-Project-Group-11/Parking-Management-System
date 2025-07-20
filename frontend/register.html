@@ -8,16 +8,28 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
 <body>
-  <div class="auth-container">
-    <div class="auth-box">
-      <div class="auth-header">
-        <i class="fas fa-parking"></i>
-        <h1>Parking Management System</h1>
-        <h2>Create New Account</h2>
+  <div class="login-container">
+      <div class="left-panel">
+        <div class="logo">
+          <i class="fas fa-parking"></i>
+          <span>PARKING SYS</span>
+        </div>
+        <div class="hero-content">
+          <h1>Secure Parking,<br>Smart Management</h1>
+          <div class="dots">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
       </div>
-
-      <form id="registerForm" class="auth-form">
-        <div class="form-group">
+      
+      <div class="right-panel">
+        <div class="login-form">
+          <div class="login-header">
+            <h2>Create New Account</h2>
+          </div>
+          <div class="form-group">
           <label for="userType"><i class="fas fa-user-tag"></i> User Type</label>
           <select id="userType" name="userType" required>
             <option value="">Select User Type</option>
@@ -56,8 +68,8 @@
           <label for="telNo"><i class="fas fa-phone"></i> Telephone Number</label>
           <input type="tel" id="telNo" name="telNo" placeholder="Enter your phone number" required />
         </div>
- <div class="form-group">
-                        <label for="vehicleType"><i class="fa-solid fa-caret-down"></i>vehicle Type</label>
+        <div class="form-group">
+                        <label for="vehicleType"><i class="fa-solid fa-caret-down"></i> Vehicle Type</label>
                         <select id="vehicleType"name="vehicleType"  required>
                             <option value="">Select Vehicle Type</option>
                             <option value="car">Car</option>
@@ -89,9 +101,7 @@
           <input type="password" id="password" name="password" placeholder="Enter your password" required />
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">
-          <i class="fas fa-user-plus"></i> Register
-        </button>
+        <button type="submit" class="btn-main">Register</button>
       </form>
 
       <div id="registerSuccess" class="auth-message" style="display: none;">
@@ -101,12 +111,15 @@
         <a href="index.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Login</a>
       </div>
 
-      <div class="auth-footer">
+      <div class="login-footer">
         <p>Already have an account? <a href="index.html">Login here</a></p>
       </div>
     </div>
   </div>
 
   <script src="js/register.js"></script>
-</body>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
