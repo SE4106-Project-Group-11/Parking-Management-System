@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
+/*
     document.body.addEventListener('click', async function(e) {
         if (e.target.classList.contains('pay-fine-btn')) {
             const violationId = e.target.getAttribute('data-violation-id');
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
+*/
     // --- Utility Functions (These were provided in your `script.js` - ensure global accessibility) ---
     // If you are still getting 'xxx is not defined', then `showNotification`, `showModal`, `closeModal`,
     // `formatDate`, `capitalizeFirstLetter` must be copied directly into `employee.js` (outside `DOMContentLoaded`).

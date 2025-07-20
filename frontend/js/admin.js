@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 */
     // Sample user data for search functionality
+    
     const users = [
         {
             id: '', name: '',  email: '',department: '',vehicleNo: '',permitStatus: '',userType: ''

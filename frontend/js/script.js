@@ -390,13 +390,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to load violations for the current user
     async function loadUserViolations() {
   const userId   = localStorage.getItem('userId');
-  const userRole = localStorage.getItem('userRole');
+  const userType = localStorage.getItem('userRole');
   const token    = localStorage.getItem('token');
 
   if (!userId || !token) return showViolationError('Please log in.');
 
   const res = await fetch(
-    `http://localhost:5000/api/violations/user/${userId}?userType=${userRole}`,
+    `http://localhost:5000/api/violations/user/${userId}?userType=${userType}`,
     {
       headers: { 'Authorization': `Bearer ${token}` }
     }

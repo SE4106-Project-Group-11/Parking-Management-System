@@ -50,17 +50,25 @@ exports.getAllViolations = async (req, res) => {
 };
 
 exports.getViolationsByUser = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { userType } = req.query;  
-    const filter = { userId };
-    if (userType) filter.userType = userType;
+  const { userId } = req.params;
+  const { userType } = req.query;
 
-    const list = await Violation.find( filter ).sort({ date: -1 });
-    res.status(200).json({ success: true, violations: list });
-  } catch (err) {
-    console.error("Error fetching user violations:", err);
-    res.status(500).json({ success: false, error: err.message });
+  if (!userId || !userType) {
+    return res.status(400).json({ success: false, message: 'Missing userId or userType' });
+  }
+
+  try {
+    // This query now finds the user by their ID and does a case-insensitive search for the userType.
+    const query = {
+      userId: userId, 
+      userType: new RegExp('^' + userType + '$', 'i') 
+    };
+    
+    const violations = await Violation.find(query).sort({ date: -1 });
+    res.status(200).json({ success: true, violations });
+  } catch (error) {
+    console.error('Error fetching violations:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
