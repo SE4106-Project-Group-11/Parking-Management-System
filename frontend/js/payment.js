@@ -116,7 +116,7 @@ async function initializeStripe() {
     }
     if (!stripe) {
         try {
-            stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // <<< IMPORTANT: Replace with your key
+            stripe = Stripe('pk_test_51RkTtcQBCT5aRlOBsQOWLfz7dcLVqkJ23KuIfze4K8YetPS8mIvx4bTd2e7GRtQ0kTcAuQbasAbWpznwewZQCDJL00YZ6pu6i4'); // <<< IMPORTANT: Replace with your key
             elements = stripe.elements();
             cardElement = elements.create('card');
             cardElement.mount('#card-element');
