@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register - Parking Management System</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/login&register.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
 <body>
@@ -29,97 +29,98 @@
           <div class="login-header">
             <h2>Create New Account</h2>
           </div>
-          <div class="form-group">
-          <label for="userType"><i class="fas fa-user-tag"></i> User Type</label>
-          <select id="userType" name="userType" required>
-            <option value="">Select User Type</option>
-            <option value="employee">Employee</option>
-            <option value="nonemployee">Non-Employee</option>
-            <option value="visitor">Visitor</option>
-          </select>
-        </div>
 
-        <div class="form-group" id="userIdGroup">
-          <label for="userId"><i class="fas fa-id-card"></i> User ID</label>
-          <input type="text" id="userId" name="userId" placeholder="Enter your ID" required />
-        </div>
-
-        <div class="form-group">
-          <label for="name"><i class="fas fa-user"></i> Full Name</label>
-          <input type="text" id="name" name="name" placeholder="Enter your full name" required />
-        </div>
-
-        <div class="form-group">
-          <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email" required />
-        </div>
-
-        <div class="form-group">
-          <label for="nic"><i class="fas fa-id-card"></i> NIC</label>
-          <input type="text" id="nic" name="nic" placeholder="Enter your NIC" required />
-        </div>
-
-        <div class="form-group">
-          <label for="address"><i class="fa-solid fa-location-dot"></i> Address</label>
-          <input type="text" id="address" name="address" placeholder="Enter your Address" required />
-        </div>
-
-        <div class="form-group">
-          <label for="telNo"><i class="fas fa-phone"></i> Telephone Number</label>
-          <input type="tel" id="telNo" name="telNo" placeholder="Enter your phone number" required />
-        </div>
-        <div class="form-group">
-                        <label for="vehicleType"><i class="fa-solid fa-caret-down"></i> Vehicle Type</label>
-                        <select id="vehicleType"name="vehicleType"  required>
-                            <option value="">Select Vehicle Type</option>
-                            <option value="car">Car</option>
-                            <option value="van">Van </option>
-                            <option value="bike">Bike </option>
-                            <option value="wheel">Wheel</option>
-                        </select>
-                    </div>
-        
-
-          <div class="form-group">
-          <label for="vehicleNo"><i class="fa-solid fa-car"></i>Vehicle Number</label>
-         <input type="text" id="vehicleNo" name="vehicleNo" placeholder="Enter your vehicle number" required />
-         </div>
-
-         <div class="form-group" id="permitGroup">
-            <label for="permitType"><i class="fa-solid fa-receipt"></i>Permit Type</label>
-            <select id="permitType" name="permitType"  required>
-                      <option value="">Select permit Type</option>
-                      <option value="day">Day (200.00)</option>
-                      <option value="week">Week (800.00)</option>
-                      <option value="month">Month (2000.00)</option>
-                      <option value="annual">Annual (5000.00)</option>
+          <form id="registerForm">
+            <div class="form-group">
+              <label for="userType"><i class="fas fa-user-tag"></i> User Type</label>
+              <select id="userType" name="userType" required>
+                <option value="">Select User Type</option>
+                <option value="employee">Employee</option>
+                <option value="nonemployee">Non-Employee</option>
+                <option value="visitor">Visitor</option>
               </select>
-                    </div>
+            </div>
 
-        <div class="form-group">
-          <label for="password"><i class="fas fa-lock"></i> Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required />
+            <div class="form-group" id="userIdGroup">
+              <label for="userId"><i class="fas fa-id-card"></i> User ID</label>
+              <input type="text" id="userId" name="userId" placeholder="Enter your ID" required />
+            </div>
+
+            <div class="form-group">
+              <label for="name"><i class="fas fa-user"></i> Full Name</label>
+              <input type="text" id="name" name="name" placeholder="Enter your full name" required />
+            </div>
+
+            <div class="form-group">
+              <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+              <input type="email" id="email" name="email" placeholder="Enter your email" required />
+            </div>
+
+            <div class="form-group">
+              <label for="nic"><i class="fas fa-id-card"></i> NIC</label>
+              <input type="text" id="nic" name="nic" placeholder="Enter your NIC" required />
+            </div>
+
+            <div class="form-group">
+              <label for="address"><i class="fa-solid fa-location-dot"></i> Address</label>
+              <input type="text" id="address" name="address" placeholder="Enter your Address" required />
+            </div>
+
+            <div class="form-group">
+              <label for="telNo"><i class="fas fa-phone"></i> Telephone Number</label>
+              <input type="tel" id="telNo" name="telNo" placeholder="Enter your phone number" required />
+            </div>
+
+            <div class="form-group">
+              <label for="vehicleType"><i class="fa-solid fa-caret-down"></i> Vehicle Type</label>
+              <select id="vehicleType"name="vehicleType"  required>
+                  <option value="">Select Vehicle Type</option>
+                  <option value="car">Car</option>
+                  <option value="van">Van </option>
+                  <option value="bike">Bike </option>
+                  <option value="wheel">Wheel</option>
+              </select>
+            </div>
+      
+            <div class="form-group">
+              <label for="vehicleNo"><i class="fa-solid fa-car"></i>Vehicle Number</label>
+              <input type="text" id="vehicleNo" name="vehicleNo" placeholder="Enter your vehicle number" required />
+            </div>
+
+            <div class="form-group" id="permitGroup">
+              <label for="permitType"><i class="fa-solid fa-receipt"></i>Permit Type</label>
+              <select id="permitType" name="permitType"  required>
+                <option value="">Select permit Type</option>
+                <option value="day">Day (200.00)</option>
+                <option value="week">Week (800.00)</option>
+                <option value="month">Month (2000.00)</option>
+                <option value="annual">Annual (5000.00)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="password"><i class="fas fa-lock"></i> Password</label>
+              <input type="password" id="password" name="password" placeholder="Enter your password" required />
+            </div>
+
+            <button type="submit" class="btn-main">Register</button>
+            
+          </form>
+
+          <div id="registerSuccess" class="auth-message" style="display: none;">
+            <i class="fas fa-check-circle"></i>
+            <h3>Registration Submitted!</h3>
+            <p>Your registration is pending admin approval. You will receive an email with your login credentials once your account is approved.</p>
+            <a href="index.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Login</a>
+          </div>
+
+          <div class="login-footer">
+            <p>Already have an account? <a href="index.html">Login here</a></p>
+          </div>
         </div>
-
-        <button type="submit" class="btn-main">Register</button>
-      </form>
-
-      <div id="registerSuccess" class="auth-message" style="display: none;">
-        <i class="fas fa-check-circle"></i>
-        <h3>Registration Submitted!</h3>
-        <p>Your registration is pending admin approval. You will receive an email with your login credentials once your account is approved.</p>
-        <a href="index.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Login</a>
       </div>
-
-      <div class="login-footer">
-        <p>Already have an account? <a href="index.html">Login here</a></p>
-      </div>
-    </div>
   </div>
 
   <script src="js/register.js"></script>
-        </div>
-      </div>
-    </div>
-  </body>
+</body>
 </html>
