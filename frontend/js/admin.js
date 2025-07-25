@@ -438,7 +438,7 @@ function showNotification(message, type) {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="fineAmount">Fine Amount ($)</label>
+                        <label for="fineAmount">Fine Amount (LKR)</label>
                         <input type="number" id="fineAmount" class="form-control" min="1" step="0.01" required>
                     </div>
                     <div class="form-group">
