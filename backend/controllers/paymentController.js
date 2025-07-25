@@ -23,6 +23,26 @@ const Visitor = require('../models/Visitor');
 const NonEmployee = require('../models/NonEmployee');
 
 
+// --- NEW: Helper function to generate the next sequential payment ID ---
+async function getNextPaymentId() {
+    // Find the last payment record sorted by creation date to ensure we get the latest one.
+    // Note: Your Payment model should have timestamps enabled for 'createdAt' to be most reliable.
+    // If not, we can sort by the 'date' field, but 'createdAt' is preferred.
+    const lastPayment = await Payment.findOne().sort({ createdAt: -1 });
+
+    if (lastPayment && lastPayment.transactionId && lastPayment.transactionId.startsWith('PID')) {
+        // If a previous payment exists with the "PID" format, increment it.
+        const lastIdNumber = parseInt(lastPayment.transactionId.substring(3), 10);
+        const nextIdNumber = lastIdNumber + 1;
+        // Format the number to have at least 3 digits, with leading zeros (e.g., 1 -> "001", 12 -> "012", 123 -> "123")
+        return `PID${String(nextIdNumber).padStart(3, '0')}`;
+    } else {
+        // If this is the very first payment or the last one didn't have the PID format, start with PID001.
+        return 'PID001';
+    }
+}
+
+
 exports.createPayment = async (req, res) => {
     try {
         const { amount, mode, paymentType } = req.body;
@@ -97,21 +117,28 @@ exports.processStripePayment = async (req, res) => {
         });
 
         if (paymentIntent.status === 'succeeded') {
+            // --- MODIFICATION START ---
+            // 1. Get the next sequential ID *before* creating the payment record.
+            const newTransactionId = await getNextPaymentId();
+            console.log(`Generated new sequential Payment ID: ${newTransactionId}`);
+
+            // 2. Create the payment record with the new sequential ID.
             const payment = await Payment.create({
                 userId: userId,
                 userType: userRole,
                 paymentType: paymentType,
                 amount: amount / 100,
-                mode: 'card',
+                mode: 'card', // 'card' is more specific than 'online' for Stripe
                 date: new Date(),
-                transactionId: paymentIntent.id,
-                gatewayResponse: paymentIntent,
-                status: 'paid'
+                transactionId: newTransactionId, // <-- Use the new sequential ID here
+                gatewayResponse: paymentIntent,  // Still save the full Stripe response for reference
+                status: 'succeeded' // Use 'succeeded' to match Stripe's terminology
             });
+            // --- MODIFICATION END ---
 
             res.status(200).json({
                 success: true,
-                message: 'Payment succeeded!',
+                message: `Payment succeeded! Your Payment ID is ${newTransactionId}.`, // Updated message
                 payment: payment,
                 stripeResponse: paymentIntent
             });
