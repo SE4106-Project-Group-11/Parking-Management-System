@@ -1,5 +1,3 @@
-// frontend/js/script.js
-
 // --- GLOBAL UTILITY FUNCTIONS (Defined outside DOMContentLoaded for universal access) ---
 
 // Function to toggle password visibility (used on login/register pages)
@@ -36,9 +34,6 @@ function showModal(contentHtml) {
     }
     modal.style.display = 'flex'; // Ensure flex display for centering
     setTimeout(() => { modal.classList.add('show'); }, 10); // Add 'show' class for transition
-
-    // Re-attach close listeners for new content in dynamic modal
-    // This relies on event delegation for buttons with 'close-modal' class, or click outside
 }
 
 // Function to close any active modal
@@ -118,6 +113,26 @@ function capitalizeFirstLetter(string) {
 
 // --- DOMContentLoaded for page-specific initialization and event listeners ---
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ▼▼▼ FIX ADDED HERE ▼▼▼
+    // --- Sidebar Active Link Handler ---
+    // This logic ensures the correct sidebar link is highlighted on every page.
+    const currentPage = window.location.pathname.split('/').pop();
+    const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+
+    sidebarLinks.forEach(link => {
+        const linkPage = link.getAttribute('href').split('/').pop();
+        
+        // First, remove the 'active' class from every link to reset them
+        link.classList.remove('active');
+
+        // Then, add the 'active' class back ONLY to the link that matches the current page
+        if (currentPage === linkPage) {
+            link.classList.add('active');
+        }
+    });
+    // ▲▲▲ END OF FIX ▲▲▲
+
 
     // --- LOGIN FORM LOGIC (Only runs on pages with a loginForm element) ---
     const loginForm = document.getElementById('loginForm');

@@ -116,7 +116,7 @@ async function initializeStripe() {
     }
     if (!stripe) {
         try {
-            stripe = Stripe(''); // <<< IMPORTANT: Replace with your key
+            stripe = Stripe('pk_test_51RkTtcQBCT5aRlOBsQOWLfz7dcLVqkJ23KuIfze4K8YetPS8mIvx4bTd2e7GRtQ0kTcAuQbasAbWpznwewZQCDJL00YZ6pu6i4'); // <<< IMPORTANT: Replace with your key
             elements = stripe.elements();
             cardElement = elements.create('card');
             cardElement.mount('#card-element');
@@ -182,12 +182,13 @@ function populatePaymentsTable(payments) {
         const row = document.createElement('tr');
         const paymentDate = new Date(payment.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-        console.log("DEBUG: Populating payment with _id:", payment._id, "as string:", String(payment._id), "and type:", typeof payment._id);
+        // Use userRole from global variable to display correct type if missing
+        const userTypeDisplay = payment.userType ? capitalizeFirstLetter(payment.userType) : (userRole === 'employee' ? 'Employee' : 'Non-Employee');
 
         row.innerHTML = `
             <td>${payment.transactionId || String(payment._id)}</td>
             <td>${capitalizeFirstLetter(payment.paymentType)}</td>
-            <td>${capitalizeFirstLetter(payment.userType)}</td>
+            <td>${userTypeDisplay}</td>
             <td>${payment.userId}</td>
             <td>LKR ${payment.amount.toFixed(2)}</td>
             <td>${paymentDate}</td>
@@ -221,6 +222,8 @@ function showPaymentDetailsModal(payment) {
     const cardDetails = stripeResponse && stripeResponse.latest_charge && stripeResponse.latest_charge.payment_method_details && stripeResponse.latest_charge.payment_method_details.card
                         ? stripeResponse.latest_charge.payment_method_details.card : null;
 
+    // Use userRole from global variable to display correct type if missing
+    const userTypeDisplay = payment.userType ? capitalizeFirstLetter(payment.userType) : (userRole === 'employee' ? 'Employee' : 'Non-Employee');
     const modalContent = `
         <div class="modal-header">
             <h2>Payment Details</h2>
@@ -231,7 +234,7 @@ function showPaymentDetailsModal(payment) {
                 <h3>Transaction Overview</h3>
                 <p><strong>Payment ID:</strong> ${payment.transactionId || payment._id}</p>
                 <p><strong>Payment Type:</strong> ${capitalizeFirstLetter(payment.paymentType)}</p>
-                <p><strong>User Type:</strong> ${capitalizeFirstLetter(payment.userType)}</p>
+                <p><strong>User Type:</strong> ${userTypeDisplay}</p>
                 <p><strong>User ID:</strong> ${payment.userId}</p>
                 <p><strong>Amount:</strong> LKR ${payment.amount ? payment.amount.toFixed(2) : '0.00'}</p>
                 <p><strong>Date:</strong> ${formatDate(payment.date)}</p>

@@ -283,3 +283,44 @@ exports.getCurrentUser = async (req, res) => {
 exports.logout = (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 };
+
+
+
+// Non-employee
+
+exports.getDashboardData = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const userRole = req.user.role;
+
+        if (userRole !== 'nonemployee') {
+            return res.status(403).json({ success: false, message: 'Access denied.' });
+        }
+        
+        const user = await NonEmployee.findById(userId)
+            .select('-password')
+            .populate('permits')
+            .populate('violations')
+            .populate('payments');
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        const activePermit = user.permits.find(p => p.status === 'active');
+
+        res.status(200).json({
+            success: true,
+            data: {
+                user,
+                activePermit,
+                allViolations: user.violations,
+                allPayments: user.payments
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};

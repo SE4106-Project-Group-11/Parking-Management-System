@@ -7,7 +7,8 @@ const connectDB = require('./utils/db');
 
 // --- ROUTE IMPORTS ---
 // <<< CRITICAL: Make sure the filename here matches your actual file name (authRoutes.js)
-const authRoutes = require('./routes/authRoutes'); // CORRECTED FROM './routes/auth'
+// const authRoutes = require('./routes/authRoutes'); // CORRECTED FROM './routes/auth'
+const authRoutes = require('./routes/auth');
 const paymentRoutes = require('./routes/payment');
 const permitRoutes = require('./routes/permit');
 const adminRoutes = require('./routes/admin'); // Assuming this file exists and is named admin.js

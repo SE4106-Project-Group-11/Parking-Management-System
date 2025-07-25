@@ -41,8 +41,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const responseData = await res.json();
 
-        if (res.ok && responseData.user) {
-            const employeeData = responseData.user;
+        // Adjust for dashboard response structure
+        const employeeData = responseData.data && responseData.data.user ? responseData.data.user : responseData.user;
+        if (res.ok && employeeData) {
 
             // 1. Update Header Display with fetched details
             if (employeeNameDisplay) employeeNameDisplay.textContent = `Welcome, ${employeeData.name || 'Employee'}!`;
