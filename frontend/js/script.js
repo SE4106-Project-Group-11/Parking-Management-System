@@ -562,7 +562,7 @@ window.addEventListener('DOMContentLoaded', () => {
             date: '',
             vehicle: '',
             description: '',
-            fine: 5.00,
+            fine: '',
             status: ''
         }
        
