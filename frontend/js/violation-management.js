@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function setupEventListeners() {
-        createViolationBtn.addEventListener('click', showCreateViolationModal);
+        createViolationBtn.addEventListener('click', () => {
+  openViolationModal();
+});
         
         // Add refresh button functionality
         const refreshBtn = document.getElementById('refreshBtn');
@@ -91,13 +93,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // You can customize this logic based on your violation status system
         const newViolations = violations.filter(v => !v.resolved).length;
         const resolvedViolations = violations.filter(v => v.resolved).length;
-        
         newCount.textContent = newViolations;
         resolvedCount.textContent = resolvedViolations;
     }
     
     // Show create violation modal
     function showCreateViolationModal() {
+        
         const modal = createModal();
         document.body.appendChild(modal);
         

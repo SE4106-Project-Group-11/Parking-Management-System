@@ -5,69 +5,106 @@ const Visitor = require('../models/Visitor');
 const NonEmployee = require('../models/NonEmployee');
 const Payment = require('../models/Payment');
 
+// Helper function to find the real database _id from a custom ID like 'EMP1'
+async function findRealUserId(userType, customUserId) {
+    let user;
+    if (userType === 'employee') {
+        // We assume the custom ID is stored in the 'empID' field in your Employee model
+        user = await Employee.findOne({ empID: customUserId });
+    } else if (userType === 'nonemployee') {
+        // Assuming custom ID for non-employees is their NIC or another unique field
+        user = await NonEmployee.findOne({ nic: customUserId }); 
+    } else if (userType === 'visitor') {
+        // Assuming custom ID for visitors is their NIC or another unique field
+        user = await Visitor.findOne({ nic: customUserId });
+    }
+    // Return the database _id if found, otherwise return the original ID
+    return user ? user._id.toString() : customUserId;
+}
+
+async function generateViolationId() {
+  const last = await Violation.findOne().sort({ _id: -1 });
+  let lastId = last?.violationId || "VIO000";
+  let num = parseInt(lastId.replace("VIO", ""));
+  let next = "VIO" + String(num + 1).padStart(3, "0");
+  return next;
+} 
+
+// *** MODIFIED createViolation FUNCTION ***
 exports.createViolation = async (req, res) => {
-  try {
-    const { violationId, vehicleNo, date, violationType, fineAmount, message, userType, userId } = req.body;
+  try {
+    const { vehicleNo, date, violationType, fineAmount, message, userType, userId } = req.body;
 
+    // This is the new smart logic:
+    // It takes the userId from the form (e.g., "EMP1") and finds the real database _id.
+    const realUserId = await findRealUserId(userType, userId);
 
-    if (!violationId || !vehicleNo || !date || !violationType || !fineAmount || !userType || !userId) {
-        return res.status(400).json({ success: false, message: 'Missing required violation fields.' });
-    }
+    const violationId = await generateViolationId();
 
+    const newViolation = new Violation({
+      violationId, vehicleNo, date, violationType, fineAmount, message, userType,
+      userId: realUserId // We save the CORRECT database _id here
+    });
 
-    const violation = await Violation.create({
-      violationId, vehicleNo, date, violationType, fineAmount, message, userType, userId
+    const saved = await newViolation.save();
+    return res.status(201).json({ success: true, violation: saved });
 
-    });
-
-    let UserModel;
-    if (userType === 'employee') UserModel = Employee;
-    else if (userType === 'visitor') UserModel = Visitor;
-    else if (userType === 'nonemployee') UserModel = NonEmployee;
-
-    if (UserModel) {
-        const user = await UserModel.findById(userId);
-        if (user) {
-            user.violations.push(violation._id);
-            await user.save();
-        } else {
-            console.warn(`User ${userId} of type ${userType} not found when linking violation ${violation._id}`);
-        }
-    }
-
-    res.status(201).json({ success: true, message: 'Violation created successfully!', violation });
-  } catch (err) {
-    console.error('createViolation error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) {
+    console.error("Error saving violation:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
 };
 
 exports.getAllViolations = async (req, res) => {
-  try {
-    const violations = await Violation.find().sort('-date').populate({
-        path: 'userId',
-        select: 'name email empID'
-    });
-    res.json({ success: true, violations });
-  } catch (err) {
-    console.error('getAllViolations error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
+  try {
+    const all = await Violation.find().sort({ date: -1 });
+    res.status(200).json({ success: true, violations: all });
+  } catch (err) {
+    console.error("Error fetching all violations:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 };
+
 
 exports.getViolationsByUser = async (req, res) => {
-  try {
+  const { userId } = req.params; // This userId from the URL is the database _id
+  const { userType } = req.query;
 
-    const targetUserId = req.params.userId;
-    const violations = await Violation.find({ userId: targetUserId }).sort('-date');
-    res.json({ success: true, violations });
+  if (!userId || !userType) {
+    return res.status(400).json({ success: false, message: 'Missing userId or userType' });
+  }
 
-  } catch (err) {
-    console.error('getViolationsByUser error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
+  try {
+    // This query now works because the correct database _id was saved.
+    const violations = await Violation.find({ userId: userId, userType: userType }).sort({ date: -1 });
+    res.status(200).json({ success: true, violations });
+  } catch (error) {
+    console.error('Error fetching violations:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 };
 
+exports.deleteViolation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedViolation = await Violation.findByIdAndDelete(id);
+    if (!deletedViolation) {
+      return res.status(404).json({ success: false, error: 'Violation not found' });
+    }
+    return res.status(200).json({ success: true, message: 'Violation deleted successfully' });
+  } catch (err) {
+    console.error("Error deleting violation:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+exports.updateViolationStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const vio = await Violation.findByIdAndUpdate(id, { status }, { new: true });
+  res.json({ success: true, violation: vio });
+};
+/*
 exports.getViolationById = async (req, res) => {
     try {
         const violationId = req.params.id;
@@ -81,19 +118,7 @@ exports.getViolationById = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error fetching violation details.' });
     }
 };
-
-exports.deleteViolation = async (req, res) => {
-  try {
-    const violation = await Violation.findByIdAndDelete(req.params.id);
-    if (!violation) {
-      return res.status(404).json({ success: false, message: 'Violation not found' });
-    }
-    res.json({ success: true, message: 'Violation deleted successfully!' });
-  } catch (err) {
-    console.error('deleteViolation error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
+*/
 
 
 exports.payViolation = async (req, res) => {
@@ -134,6 +159,7 @@ exports.payViolation = async (req, res) => {
     }
 };
 
+/*
 exports.disputeViolation = async (req, res) => {
     try {
         const violationId = req.params.id;
@@ -165,4 +191,4 @@ exports.disputeViolation = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error during dispute submission.' });
     }
 };
-
+*/
