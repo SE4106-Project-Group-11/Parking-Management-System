@@ -6,10 +6,39 @@
     <title>Parking QR Scanner</title>
     <!-- Link to the CSS file -->
     <link rel="stylesheet" href="../../css/scanner.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/admin.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>QR scanner</h2>
+            </div>
+             <ul class="sidebar-menu">
+                <li><a href="dashboard.html" class="active"><i class="fas fa-id-card"></i> Permit Requests</a></li>
+                <li><a href="employees.html"><i class="fas fa-users"></i> Employees</a></li>
+                <li><a href="nonemployees.html"><i class="fas fa-user"></i> Non-Employees</a></li>
+                <li><a href="visitors.html"><i class="fas fa-user-friends"></i> Visitors</a></li>
+                <li><a href="violation-management.html"><i class="fas fa-exclamation-triangle"></i> Violations</a></li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li><a href="scanner.html"><i class="fa-solid fa-qrcode"></i>QR Scanner</a></li>
+                <li><a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+
     <!-- Main container for the scanner interface -->
-    <main class="scanner-container fade-in">
+    <main class="main-content scanner-container fade-in">
         <div class="header">
             <div class="scanner-icon">📱</div>
             <h1>Scan Parking Permit</h1>
@@ -46,6 +75,7 @@
             🔄 Scan Again
         </button>
     </main>
+</div>
 
     <!-- Include the third-party QR scanner library -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
