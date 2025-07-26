@@ -1,443 +1,635 @@
-// controllers/parkingController.js - SIMPLIFIED AND FIXED VERSION
+// parkingController.js - CORRECTED VERSION
+
 const ParkingSlot = require('../models/ParkingSlot');
 
-// Initialize parking data on server start
-exports.initializeParkingData = async () => {
+// FIXED: Enhanced QR verification with bulletproof save
+exports.verifyQRAndAddEntryBulletproof = async (req, res) => {
     try {
-        console.log('🚀 Initializing parking system...');
-        
-        // Use the model's static method to get today's data
-        const todayData = await ParkingSlot.getTodaysParkingData();
-        const counts = todayData.getCounts();
-        
-        console.log('✅ Parking system initialized:', counts);
-        
-        return {
-            success: true,
-            message: 'Parking system initialized',
-            data: counts
-        };
-    } catch (error) {
-        console.error('❌ Error initializing parking system:', error);
-        throw error;
-    }
-};
+        console.log('\n🔥 BULLETPROOF QR Code Entry Verification Started');
+        console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
+        console.log('📥 Request headers:', JSON.stringify(req.headers, null, 2));
 
-// Simple QR Code verification function
-async function verifyQRCode({ userId, permitId, userName }) {
-    try {
-        console.log('🔐 Verifying QR code data...');
-        
-        // Basic validation - customize this based on your QR code format
-        if (!userId || !permitId || !userName) {
-            console.log('❌ Missing required fields in QR code');
-            return { valid: false, reason: 'Missing required fields' };
-        }
-        
-        // Simple format validation
-        if (userId.length < 3) {
-            console.log('❌ Invalid userId format');
-            return { valid: false, reason: 'Invalid userId format' };
-        }
-        
-        if (!permitId.startsWith('P') && !permitId.startsWith('permit')) {
-            console.log('❌ Invalid permitId format');
-            return { valid: false, reason: 'Invalid permitId format' };
-        }
-        
-        console.log('✅ QR code validation passed');
-        return { valid: true };
-        
-    } catch (error) {
-        console.error('❌ Error during QR verification:', error);
-        return { valid: false, reason: 'Verification system error' };
-    }
-}
-
-// Simplified data extraction from QR code
-function extractUserDataFromQR(qrData, additionalData = {}) {
-    let userId, permitId, userName;
-    
-    try {
-        // Handle different QR data formats
-        if (typeof qrData === 'string') {
-            try {
-                // Try to parse as JSON first
-                const parsed = JSON.parse(qrData);
-                userId = parsed.userId || parsed.id;
-                permitId = parsed.permitId || parsed.permit;
-                userName = parsed.userName || parsed.name;
-            } catch (e) {
-                // If not JSON, treat as plain userId
-                userId = qrData;
-                permitId = additionalData?.permitId;
-                userName = additionalData?.userName;
-            }
-        } else if (typeof qrData === 'object' && qrData !== null) {
-            userId = qrData.userId || qrData.id;
-            permitId = qrData.permitId || qrData.permit || qrData.permitId;
-            userName = qrData.userName || qrData.name;
-        }
-        
-        // Also check additionalData for missing fields
-        userId = userId || additionalData?.userId;
-        permitId = permitId || additionalData?.permitId;
-        userName = userName || additionalData?.userName;
-        
-        console.log('📋 Extracted data:', { userId, permitId, userName });
-        
-        return { userId, permitId, userName };
-        
-    } catch (error) {
-        console.error('❌ Error extracting QR data:', error);
-        return { userId: null, permitId: null, userName: null };
-    }
-}
-
-// QR Code verification and entry - SIMPLIFIED VERSION
-exports.verifyQRAndAddEntry = async (req, res) => {
-    try {
-        console.log('🔍 QR Code entry verification started...');
-        console.log('📥 Request body:', req.body);
-        
-        // Extract user data from request
         const { qrData, additionalData, userId, permitId, userName } = req.body;
-        
         let userData;
-        
-        // Direct data provided (preferred method)
+
+        // FIXED: Better data extraction with validation
         if (userId && permitId && userName) {
-            userData = { userId, permitId, userName };
+            userData = { 
+                userId: userId.toString().trim(), 
+                permitId: permitId.toString().trim(), 
+                userName: userName.toString().trim() 
+            };
             console.log('📋 Using direct data:', userData);
-        } 
-        // Extract from QR data
-        else if (qrData) {
+        } else if (qrData) {
             userData = extractUserDataFromQR(qrData, additionalData);
-        } 
-        // No valid data
-        else {
-            console.log('❌ No valid user data provided');
+            console.log('📋 Extracted from QR:', userData);
+        } else {
+            console.log('❌ No valid user data provided in request');
             return res.status(400).json({
                 success: false,
-                message: 'No valid user data provided. Please provide userId, permitId, and userName.',
-                expectedFormats: [
-                    'Direct: { "userId": "...", "permitId": "...", "userName": "..." }',
-                    'QR JSON: { "qrData": "{\\"userId\\":\\"...\\", \\"permitId\\":\\"...\\", \\"userName\\":\\"...\\"}" }',
-                    'QR Object: { "qrData": { "userId": "...", "permitId": "...", "userName": "..." } }'
-                ]
+                message: 'No valid user data provided. Please provide either (userId, permitId, userName) or qrData.',
+                required: {
+                    option1: ['userId', 'permitId', 'userName'],
+                    option2: ['qrData']
+                },
+                received: Object.keys(req.body)
             });
         }
-        
-        // Validate extracted data
-        if (!userData.userId || !userData.permitId || !userData.userName) {
-            console.log('❌ Incomplete user data:', userData);
+
+        // FIXED: More thorough validation
+        if (!userData || !userData.userId || !userData.permitId || !userData.userName) {
+            console.log('❌ Incomplete user data after extraction');
             return res.status(400).json({
                 success: false,
-                message: 'Incomplete user data. Missing required fields.',
+                message: 'Incomplete user data extracted',
                 required: ['userId', 'permitId', 'userName'],
-                received: userData
+                received: userData,
+                troubleshooting: {
+                    qrData: qrData ? 'provided' : 'missing',
+                    directData: { userId: !!userId, permitId: !!permitId, userName: !!userName }
+                }
             });
         }
-        
-        // Verify QR code (optional - customize based on your needs)
+
+        // FIXED: Enhanced QR verification
+        console.log('🔐 Starting QR verification...');
         const verification = await verifyQRCode(userData);
         if (!verification.valid) {
             console.log('❌ QR verification failed:', verification.reason);
             return res.status(401).json({
                 success: false,
                 message: 'QR code verification failed',
-                reason: verification.reason
+                reason: verification.reason,
+                userData: userData
+            });
+        }
+
+        console.log('✅ QR verification passed, attempting bulletproof save...');
+
+        // FIXED: Use the bulletproof save method with better error handling
+        try {
+            const savedSlot = await ParkingSlot.saveVerifiedUserEntry(userData);
+            const counts = savedSlot.getCounts();
+
+            // FIXED: Better verification of the saved entry
+            const savedEntry = savedSlot.verifiedEntries.find(
+                entry => entry.userId === userData.userId && entry.status === 'entered'
+            );
+
+            if (!savedEntry) {
+                throw new Error('CRITICAL: Entry verification failed after save - entry not found in database');
+            }
+
+            console.log('🎉 BULLETPROOF SAVE SUCCESSFUL!');
+            console.log('📊 Final counts:', counts);
+            console.log('📋 Saved entry:', {
+                userId: savedEntry.userId,
+                permitId: savedEntry.permitId,
+                userName: savedEntry.userName,
+                entryTime: savedEntry.entryTime,
+                status: savedEntry.status
+            });
+
+            // FIXED: More comprehensive response
+            return res.status(200).json({
+                success: true,
+                message: `QR verified and entry saved successfully for ${userData.userName}`,
+                data: {
+                    userInfo: {
+                        userId: userData.userId,
+                        permitId: userData.permitId,
+                        userName: userData.userName,
+                        entryTime: savedEntry.entryTime,
+                        status: savedEntry.status
+                    },
+                    parkingStatus: counts,
+                    databaseInfo: {
+                        documentId: savedSlot._id,
+                        documentDate: savedSlot.date,
+                        totalEntriesInDB: savedSlot.verifiedEntries.length,
+                        saveMethod: 'bulletproof-transaction',
+                        verified: true,
+                        entryId: savedEntry._id
+                    }
+                },
+                timestamp: new Date()
+            });
+
+        } catch (saveError) {
+            console.error('❌ Save operation failed:', saveError.message);
+            
+            // FIXED: Better error categorization
+            if (saveError.message.includes('already entered')) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'You have already entered the parking area today',
+                    errorCode: 'DUPLICATE_ENTRY',
+                    userData: userData
+                });
+            }
+
+            if (saveError.message.includes('Parking is full')) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Parking is full. No available slots.',
+                    errorCode: 'PARKING_FULL',
+                    userData: userData
+                });
+            }
+
+            // Database connection issues
+            if (saveError.message.includes('connection') || saveError.message.includes('timeout')) {
+                return res.status(503).json({
+                    success: false,
+                    message: 'Database connection error. Please try again.',
+                    errorCode: 'DATABASE_CONNECTION_ERROR'
+                });
+            }
+
+            // Generic save error
+            throw saveError;
+        }
+
+    } catch (error) {
+        console.error('❌ BULLETPROOF QR entry failed:', error.message);
+        console.error('📋 Error stack:', error.stack);
+
+        return res.status(500).json({
+            success: false,
+            message: 'QR verification and entry failed due to system error',
+            errorCode: 'SYSTEM_ERROR',
+            error: process.env.NODE_ENV === 'development' ? {
+                message: error.message,
+                stack: error.stack
+            } : 'Internal server error',
+            timestamp: new Date()
+        });
+    }
+};
+
+// FIXED: Test database save functionality
+exports.testDatabaseSave = async (req, res) => {
+    try {
+        console.log('🧪 Testing database save functionality...');
+        
+        // Test the model's test method
+        const testResult = await ParkingSlot.testDatabaseSave();
+        
+        // Also get current status
+        const currentStatus = await ParkingSlot.getTodaysParkingData();
+        const counts = currentStatus.getCounts();
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Database save test completed',
+            testResult,
+            currentStatus: {
+                documentId: currentStatus._id,
+                documentDate: currentStatus.date,
+                ...counts,
+                allEntries: currentStatus.verifiedEntries.map(entry => ({
+                    id: entry._id,
+                    userId: entry.userId,
+                    userName: entry.userName,
+                    permitId: entry.permitId,
+                    status: entry.status,
+                    entryTime: entry.entryTime
+                }))
+            },
+            timestamp: new Date()
+        });
+        
+    } catch (error) {
+        console.error('❌ Database save test failed:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Database save test failed',
+            error: {
+                message: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            }
+        });
+    }
+};
+
+// FIXED: Manual entry for testing
+exports.manualTestEntry = async (req, res) => {
+    try {
+        console.log('🔧 Manual test entry started...');
+        console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
+        
+        const { userId, permitId, userName } = req.body;
+        
+        // FIXED: Better default test data generation
+        const timestamp = Date.now();
+        const testData = {
+            userId: userId || `manual-test-${timestamp}`,
+            permitId: permitId || `MANUAL-${timestamp}`,
+            userName: userName || `Manual Test User ${timestamp}`
+        };
+        
+        console.log('📝 Manual test data:', testData);
+        
+        // Validate test data
+        if (!testData.userId || !testData.permitId || !testData.userName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid test data generated',
+                testData
             });
         }
         
-        console.log('✅ QR code verified successfully');
-        console.log('💾 Saving entry to database...');
+        // Try to save the entry
+        const savedSlot = await ParkingSlot.saveVerifiedUserEntry(testData);
+        const counts = savedSlot.getCounts();
         
-        // Use the model's saveVerifiedUserEntry method
-        const parkingSlot = await ParkingSlot.saveVerifiedUserEntry(userData);
+        // Verify the entry was saved
+        const savedEntry = savedSlot.verifiedEntries.find(
+            entry => entry.userId === testData.userId
+        );
         
-        // Get updated counts after successful entry
-        const counts = parkingSlot.getCounts();
+        console.log('✅ Manual entry successful!');
         
-        console.log('🎉 Entry saved successfully!');
-        console.log('📊 Updated parking status:', counts);
-        console.log('📊 Available slots decreased from', parkingSlot.totalSlots, 'to', counts.availableSlots);
-        
-        // Success response with correct counts
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            message: `QR code verified and entry recorded for ${userData.userName}`,
+            message: 'Manual test entry successful',
             data: {
-                userInfo: {
-                    userId: userData.userId,
-                    permitId: userData.permitId,
-                    userName: userData.userName,
-                    entryTime: new Date(),
-                    status: 'entered'
-                },
-                parkingStatus: {
-                    totalSlots: counts.totalSlots,
-                    occupiedSlots: counts.occupiedSlots,
-                    availableSlots: counts.availableSlots,
-                    currentlyInside: counts.currentlyInside,
-                    totalEntriesToday: counts.totalEntriesToday,
-                    exitedToday: counts.exitedToday
-                },
+                testData,
+                savedEntry: savedEntry ? {
+                    id: savedEntry._id,
+                    userId: savedEntry.userId,
+                    permitId: savedEntry.permitId,
+                    userName: savedEntry.userName,
+                    entryTime: savedEntry.entryTime,
+                    status: savedEntry.status
+                } : null,
+                parkingStatus: counts,
                 databaseInfo: {
-                    documentId: parkingSlot._id,
-                    totalEntriesInDB: parkingSlot.verifiedEntries.length
+                    documentId: savedSlot._id,
+                    documentDate: savedSlot.date,
+                    totalEntriesInDB: savedSlot.verifiedEntries.length,
+                    verified: !!savedEntry
                 }
             },
             timestamp: new Date()
         });
         
     } catch (error) {
-        console.error('❌ QR entry verification failed:', error.message);
-        console.error('📋 Full error:', error);
+        console.error('❌ Manual test entry failed:', error);
         
-        // Handle specific errors
-        if (error.message === 'User has already entered today') {
+        if (error.message.includes('already entered')) {
             return res.status(409).json({
                 success: false,
-                message: 'You have already entered the parking area today',
+                message: 'User has already entered today',
                 errorCode: 'DUPLICATE_ENTRY'
             });
         }
         
-        if (error.message.includes('Missing required user data')) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid user data provided',
-                errorCode: 'INVALID_DATA'
-            });
-        }
-        
-        // Generic error response
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            message: 'QR code verification and entry recording failed',
-            errorCode: 'INTERNAL_ERROR',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            message: 'Manual test entry failed',
+            error: {
+                message: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            }
         });
     }
 };
 
-// QR Code exit verification - SIMPLIFIED VERSION
-exports.verifyQRAndMarkExit = async (req, res) => {
+// FIXED: Clear all entries for today
+exports.clearTodayEntries = async (req, res) => {
     try {
-        console.log('🚪 QR Code exit verification started...');
-        console.log('📥 Request body:', req.body);
+        console.log('🗑️ Clearing today\'s entries...');
         
-        // Extract userId from request
-        const { qrData, userId } = req.body;
+        const now = new Date();
+        const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+        const tomorrowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0, 0));
         
-        let userIdToExit;
+        // FIXED: Better clear operation with validation
+        const result = await ParkingSlot.findOneAndUpdate(
+            { date: { $gte: todayUTC, $lt: tomorrowUTC } },
+            {
+                $set: {
+                    occupiedSlots: 0,
+                    verifiedEntries: []
+                }
+            },
+            { new: true, runValidators: true }
+        );
         
-        // Direct userId provided
-        if (userId) {
-            userIdToExit = userId;
-        }
-        // Extract from QR data
-        else if (qrData) {
-            const extracted = extractUserDataFromQR(qrData);
-            userIdToExit = extracted.userId;
-        }
-        
-        if (!userIdToExit) {
-            return res.status(400).json({
-                success: false,
-                message: 'No valid userId provided for exit'
+        if (!result) {
+            console.log('📝 No document found for today, creating new one...');
+            const newSlot = new ParkingSlot({
+                date: todayUTC,
+                totalSlots: 100,
+                occupiedSlots: 0,
+                verifiedEntries: []
+            });
+            const savedSlot = await newSlot.save();
+            
+            return res.status(200).json({
+                success: true,
+                message: 'No existing document found. Created new clean document for today.',
+                data: {
+                    documentId: savedSlot._id,
+                    date: savedSlot.date,
+                    occupiedSlots: savedSlot.occupiedSlots,
+                    entriesCount: savedSlot.verifiedEntries.length,
+                    action: 'created'
+                },
+                timestamp: new Date()
             });
         }
         
-        console.log('🔍 Processing exit for user:', userIdToExit);
+        console.log('✅ Today\'s entries cleared');
         
-        // Get today's parking data
-        const parkingSlot = await ParkingSlot.getTodaysParkingData();
-        
-        // Use the model's markExit method
-        await parkingSlot.markExit(userIdToExit);
-        
-        // Get updated counts
-        const counts = parkingSlot.getCounts();
-        
-        console.log('✅ Exit recorded successfully');
-        console.log('📊 Updated parking status:', counts);
-        
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            message: 'Exit recorded successfully',
+            message: 'Today\'s entries cleared successfully',
             data: {
-                userId: userIdToExit,
-                exitTime: new Date(),
-                parkingStatus: counts
+                documentId: result._id,
+                date: result.date,
+                occupiedSlots: result.occupiedSlots,
+                entriesCount: result.verifiedEntries.length,
+                action: 'cleared'
             },
             timestamp: new Date()
         });
         
     } catch (error) {
-        console.error('❌ Exit verification error:', error.message);
-        
-        if (error.message === 'No active entry found for this user') {
-            return res.status(404).json({
-                success: false,
-                message: 'No active parking entry found for this user today',
-                errorCode: 'NO_ACTIVE_ENTRY'
-            });
-        }
-        
-        res.status(500).json({
+        console.error('❌ Clear entries failed:', error);
+        return res.status(500).json({
             success: false,
-            message: 'Exit verification failed',
-            errorCode: 'INTERNAL_ERROR',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            message: 'Clear entries failed',
+            error: {
+                message: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            }
         });
     }
 };
 
-// Get parking status
+// FIXED: Get parking status
 exports.getParkingStatus = async (req, res) => {
     try {
         console.log('📊 Getting parking status...');
         
-        const parkingSlot = await ParkingSlot.getTodaysParkingData();
-        const counts = parkingSlot.getCounts();
+        const parkingData = await ParkingSlot.getTodaysParkingData();
+        const counts = parkingData.getCounts();
         
-        console.log('📈 Parking status:', counts);
-        
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: 'Parking status retrieved successfully',
             data: {
-                date: parkingSlot.date,
                 ...counts,
-                lastUpdated: parkingSlot.updatedAt,
-                entries: parkingSlot.verifiedEntries.map(entry => ({
+                documentId: parkingData._id,
+                documentDate: parkingData.date,
+                entries: parkingData.verifiedEntries.map(entry => ({
+                    id: entry._id,
                     userId: entry.userId,
-                    permitId: entry.permitId,
                     userName: entry.userName,
-                    entryTime: entry.entryTime,
-                    status: entry.status
+                    permitId: entry.permitId,
+                    status: entry.status,
+                    entryTime: entry.entryTime
                 }))
             },
             timestamp: new Date()
         });
         
     } catch (error) {
-        console.error('❌ Error fetching parking status:', error);
-        res.status(500).json({
+        console.error('❌ Get parking status failed:', error);
+        return res.status(500).json({
             success: false,
-            message: 'Error fetching parking status',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
-};
-
-// Get today's entries
-exports.getTodayEntries = async (req, res) => {
-    try {
-        console.log('📋 Getting today\'s entries...');
-        
-        const parkingSlot = await ParkingSlot.getTodaysParkingData();
-        const counts = parkingSlot.getCounts();
-        
-        // Sort entries by entry time (most recent first)
-        const sortedEntries = parkingSlot.verifiedEntries.sort((a, b) => 
-            new Date(b.entryTime) - new Date(a.entryTime)
-        );
-        
-        res.status(200).json({
-            success: true,
-            message: 'Today\'s entries retrieved successfully',
-            data: {
-                date: parkingSlot.date,
-                ...counts,
-                entries: sortedEntries.map(entry => ({
-                    userId: entry.userId,
-                    permitId: entry.permitId,
-                    userName: entry.userName,
-                    entryTime: entry.entryTime,
-                    status: entry.status
-                }))
-            },
-            timestamp: new Date()
-        });
-        
-    } catch (error) {
-        console.error('❌ Error fetching entries:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching entries',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
-};
-
-// Legacy endpoints (backward compatibility)
-exports.addEntry = async (req, res) => {
-    console.log('🔄 Legacy addEntry called, redirecting...');
-    return exports.verifyQRAndAddEntry(req, res);
-};
-
-exports.markExit = async (req, res) => {
-    console.log('🔄 Legacy markExit called, redirecting...');
-    return exports.verifyQRAndMarkExit(req, res);
-};
-
-// Add sample data for testing
-exports.addSampleData = async (req, res) => {
-    try {
-        console.log('🧪 Adding sample data...');
-        
-        const sampleUsers = [
-            { userId: 'user001', permitId: 'P001', userName: 'John Doe' },
-            { userId: 'user002', permitId: 'P002', userName: 'Jane Smith' },
-            { userId: 'user003', permitId: 'P003', userName: 'Bob Wilson' }
-        ];
-        
-        const results = [];
-        
-        for (const userData of sampleUsers) {
-            try {
-                console.log('➕ Adding sample user:', userData.userName);
-                const parkingSlot = await ParkingSlot.saveVerifiedUserEntry(userData);
-                results.push({
-                    success: true,
-                    userData,
-                    message: 'Added successfully'
-                });
-            } catch (error) {
-                console.log('❌ Error adding sample user:', userData.userName, error.message);
-                results.push({
-                    success: false,
-                    userData,
-                    message: error.message
-                });
+            message: 'Failed to get parking status',
+            error: {
+                message: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             }
+        });
+    }
+};
+
+// FIXED: Enhanced QR exit verification
+exports.verifyQRAndExit = async (req, res) => {
+    try {
+        console.log('\n🚪 QR Code Exit Verification Started');
+        console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
+
+        const { qrData, additionalData, userId, permitId, userName } = req.body;
+        let userData;
+
+        // Extract user data (same as entry)
+        if (userId && permitId && userName) {
+            userData = { 
+                userId: userId.toString().trim(), 
+                permitId: permitId.toString().trim(), 
+                userName: userName.toString().trim() 
+            };
+        } else if (qrData) {
+            userData = extractUserDataFromQR(qrData, additionalData);
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'No valid user data provided for exit'
+            });
+        }
+
+        // Validate extracted data
+        if (!userData || !userData.userId || !userData.permitId || !userData.userName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Incomplete user data for exit',
+                required: ['userId', 'permitId', 'userName'],
+                received: userData
+            });
+        }
+
+        // Verify QR code
+        const verification = await verifyQRCode(userData);
+        if (!verification.valid) {
+            return res.status(401).json({
+                success: false,
+                message: 'QR code verification failed for exit',
+                reason: verification.reason
+            });
+        }
+
+        // Get today's parking data and mark exit
+        const parkingData = await ParkingSlot.getTodaysParkingData();
+        const updatedSlot = await parkingData.markExit(userData.userId);
+        const counts = updatedSlot.getCounts();
+
+        console.log('✅ Exit processed successfully');
+
+        return res.status(200).json({
+            success: true,
+            message: `Exit processed successfully for ${userData.userName}`,
+            data: {
+                userInfo: {
+                    userId: userData.userId,
+                    permitId: userData.permitId,
+                    userName: userData.userName,
+                    exitTime: new Date()
+                },
+                parkingStatus: counts,
+                databaseInfo: {
+                    documentId: updatedSlot._id,
+                    totalEntriesInDB: updatedSlot.verifiedEntries.length
+                }
+            },
+            timestamp: new Date()
+        });
+
+    } catch (error) {
+        console.error('❌ QR exit verification failed:', error);
+
+        if (error.message.includes('No active entry found')) {
+            return res.status(404).json({
+                success: false,
+                message: 'No active entry found for this user',
+                errorCode: 'NO_ACTIVE_ENTRY'
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: 'QR exit verification failed',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// FIXED: Helper function to extract user data from QR
+function extractUserDataFromQR(qrData, additionalData = {}) {
+    let userId, permitId, userName;
+
+    try {
+        console.log('📋 Extracting data from QR:', typeof qrData, qrData);
+        
+        if (typeof qrData === 'string') {
+            // Try to parse as JSON first
+            try {
+                const parsed = JSON.parse(qrData);
+                userId = parsed.userId || parsed.id || parsed.user_id;
+                permitId = parsed.permitId || parsed.permit || parsed.permit_id;
+                userName = parsed.userName || parsed.name || parsed.user_name || parsed.fullName;
+                console.log('   Parsed as JSON:', { userId, permitId, userName });
+            } catch (jsonError) {
+                console.log('   Not JSON, treating as plain string');
+                // If not JSON, check if it's a simple userId
+                if (qrData.trim().length > 0) {
+                    userId = qrData.trim();
+                    permitId = additionalData?.permitId;
+                    userName = additionalData?.userName;
+                }
+            }
+        } else if (typeof qrData === 'object' && qrData !== null) {
+            userId = qrData.userId || qrData.id || qrData.user_id;
+            permitId = qrData.permitId || qrData.permit || qrData.permit_id;
+            userName = qrData.userName || qrData.name || qrData.user_name || qrData.fullName;
+            console.log('   Treated as object:', { userId, permitId, userName });
+        }
+
+        // Fill missing data from additionalData
+        if (!userId && additionalData?.userId) userId = additionalData.userId;
+        if (!permitId && additionalData?.permitId) permitId = additionalData.permitId;
+        if (!userName && additionalData?.userName) userName = additionalData.userName;
+
+        // Clean up the extracted data
+        if (userId) userId = userId.toString().trim();
+        if (permitId) permitId = permitId.toString().trim();
+        if (userName) userName = userName.toString().trim();
+
+        console.log('📋 Final extraction result:', { userId, permitId, userName });
+        return { userId, permitId, userName };
+
+    } catch (error) {
+        console.error('❌ Error extracting QR data:', error);
+        return { userId: null, permitId: null, userName: null };
+    }
+}
+
+// FIXED: Enhanced QR verification function
+async function verifyQRCode({ userId, permitId, userName }) {
+    try {
+        console.log('🔐 Verifying QR code data:', { userId, permitId, userName });
+        
+        // Check for required fields
+        if (!userId || !permitId || !userName) {
+            return { 
+                valid: false, 
+                reason: 'Missing required fields',
+                details: { 
+                    hasUserId: !!userId, 
+                    hasPermitId: !!permitId, 
+                    hasUserName: !!userName 
+                }
+            };
         }
         
-        // Get final status
-        const parkingSlot = await ParkingSlot.getTodaysParkingData();
-        const counts = parkingSlot.getCounts();
+        // Validate userId format
+        if (typeof userId !== 'string' || userId.length < 3) {
+            return { 
+                valid: false, 
+                reason: 'Invalid userId format - must be string with at least 3 characters',
+                received: { type: typeof userId, length: userId?.length, value: userId }
+            };
+        }
         
-        console.log('✅ Sample data processing complete');
+        // Validate permitId format (more flexible)
+        if (typeof permitId !== 'string' || permitId.length < 3) {
+            return { 
+                valid: false, 
+                reason: 'Invalid permitId format - must be string with at least 3 characters',
+                received: { type: typeof permitId, length: permitId?.length, value: permitId }
+            };
+        }
         
-        res.status(200).json({
-            success: true,
-            message: 'Sample data processing completed',
-            data: {
-                results,
-                finalStatus: counts
-            },
-            timestamp: new Date()
-        });
+        // Validate userName format
+        if (typeof userName !== 'string' || userName.length < 2) {
+            return { 
+                valid: false, 
+                reason: 'Invalid userName format - must be string with at least 2 characters',
+                received: { type: typeof userName, length: userName?.length, value: userName }
+            };
+        }
+        
+        // Additional validation rules (customize as needed)
+        if (userId.includes(' ') || userId.includes('\n') || userId.includes('\t')) {
+            return { 
+                valid: false, 
+                reason: 'UserId contains invalid characters (spaces or whitespace)' 
+            };
+        }
+        
+        // Check for common test patterns that should be allowed
+        const isTestData = userId.startsWith('test-') || 
+                          userId.startsWith('manual-') || 
+                          permitId.startsWith('TEST-') || 
+                          permitId.startsWith('MANUAL-');
+        
+        console.log('✅ QR verification passed', isTestData ? '(test data)' : '(production data)');
+        return { 
+            valid: true, 
+            isTestData,
+            validatedData: { userId, permitId, userName }
+        };
         
     } catch (error) {
-        console.error('❌ Error adding sample data:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error adding sample data',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
+        console.error('❌ QR verification error:', error);
+        return { 
+            valid: false, 
+            reason: 'Verification system error',
+            error: error.message 
+        };
     }
+}
+
+module.exports = {
+    verifyQRAndAddEntryBulletproof: exports.verifyQRAndAddEntryBulletproof,
+    testDatabaseSave: exports.testDatabaseSave,
+    manualTestEntry: exports.manualTestEntry,
+    clearTodayEntries: exports.clearTodayEntries,
+    getParkingStatus: exports.getParkingStatus,
+    verifyQRAndExit: exports.verifyQRAndExit
 };

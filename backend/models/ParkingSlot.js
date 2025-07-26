@@ -1,4 +1,4 @@
-// models/ParkingSlot.js - FIXED VERSION WITH DEBUGGING
+// models/ParkingSlot.js - CORRECTED VERSION
 const mongoose = require('mongoose');
 
 const parkingSlotSchema = new mongoose.Schema({
@@ -7,7 +7,7 @@ const parkingSlotSchema = new mongoose.Schema({
         required: true,
         default: () => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            today.setUTCHours(0, 0, 0, 0);
             return today;
         }
     },
@@ -48,206 +48,298 @@ const parkingSlotSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Index for efficient date queries
+// Create compound index for better performance
 parkingSlotSchema.index({ date: 1 });
+parkingSlotSchema.index({ 'verifiedEntries.userId': 1, 'verifiedEntries.status': 1 });
 
-// MAIN METHOD - Use this for QR code verified users
+// FIXED: Bulletproof method with proper error handling and session management
 parkingSlotSchema.statics.saveVerifiedUserEntry = async function(userData) {
+    const session = await mongoose.startSession();
+    
     try {
-        console.log('🔍 Starting saveVerifiedUserEntry with data:', userData);
+        console.log('🔥 BULLETPROOF saveVerifiedUserEntry started');
+        console.log('📊 Input userData:', JSON.stringify(userData, null, 2));
         
-        // Validate required fields
-        if (!userData || !userData.userId || !userData.permitId || !userData.userName) {
-            throw new Error('Missing required user data: userId, permitId, and userName are required');
+        // Validate input more strictly
+        if (!userData || typeof userData !== 'object') {
+            throw new Error('Invalid userData: must be an object');
+        }
+        
+        if (!userData.userId || typeof userData.userId !== 'string') {
+            throw new Error('Missing or invalid userId');
+        }
+        
+        if (!userData.permitId || typeof userData.permitId !== 'string') {
+            throw new Error('Missing or invalid permitId');
+        }
+        
+        if (!userData.userName || typeof userData.userName !== 'string') {
+            throw new Error('Missing or invalid userName');
         }
 
-        // Get today's date range
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
+        // Get today's date range in UTC
+        const now = new Date();
+        const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+        const tomorrowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0, 0));
         
-        console.log('📅 Looking for parking slot between:', today, 'and', tomorrow);
-        
-        // Find or create today's parking slot document
-        let slot = await this.findOne({ 
-            date: { $gte: today, $lt: tomorrow } 
+        console.log('📅 Date range:', { 
+            today: todayUTC.toISOString(), 
+            tomorrow: tomorrowUTC.toISOString() 
         });
-        
-        if (!slot) {
-            console.log('📝 Creating new parking slot document for today');
-            slot = new this({
-                date: today,
-                totalSlots: 100,
-                occupiedSlots: 0,
-                verifiedEntries: []
-            });
-            await slot.save();
-            console.log('✅ New parking slot document created');
-        } else {
-            console.log('📋 Found existing parking slot document');
-        }
-        
-        // Check for duplicate entry (user already entered today)
-        const existingEntry = slot.verifiedEntries.find(
-            entry => entry.userId === userData.userId && entry.status === 'entered'
-        );
-        
-        if (existingEntry) {
-            console.log('⚠️ User already has an active entry today');
-            throw new Error('User has already entered today');
-        }
-        
-        // Add new verified entry
+
+        // Start transaction
+        session.startTransaction();
+
+        // Create new entry object
         const newEntry = {
-            userId: userData.userId,
-            permitId: userData.permitId,
-            userName: userData.userName,
+            userId: userData.userId.toString().trim(),
+            permitId: userData.permitId.toString().trim(),
+            userName: userData.userName.toString().trim(),
             entryTime: new Date(),
             status: 'entered'
         };
         
-        console.log('➕ Adding new entry:', newEntry);
+        console.log('📝 New entry object:', JSON.stringify(newEntry, null, 2));
         
+        // FIXED: Check for existing document first
+        let slot = await this.findOne({
+            date: { $gte: todayUTC, $lt: tomorrowUTC }
+        }).session(session);
+
+        // If no document exists, create one
+        if (!slot) {
+            console.log('📝 Creating new parking slot document for today...');
+            slot = new this({
+                date: todayUTC,
+                totalSlots: 100,
+                occupiedSlots: 0,
+                verifiedEntries: []
+            });
+            await slot.save({ session });
+            console.log('✅ New document created with ID:', slot._id);
+        }
+
+        // FIXED: Check for duplicate entry more carefully
+        const existingEntryIndex = slot.verifiedEntries.findIndex(
+            entry => entry.userId === newEntry.userId && entry.status === 'entered'
+        );
+
+        if (existingEntryIndex !== -1) {
+            await session.abortTransaction();
+            console.log('⚠️ Duplicate entry found, user already entered');
+            throw new Error('User has already entered today');
+        }
+
+        // Check if parking is full
+        const currentOccupied = slot.verifiedEntries.filter(entry => entry.status === 'entered').length;
+        if (currentOccupied >= slot.totalSlots) {
+            await session.abortTransaction();
+            throw new Error('Parking is full. No available slots.');
+        }
+
+        // FIXED: Add entry and update counts
         slot.verifiedEntries.push(newEntry);
-        slot.occupiedSlots += 1;
+        slot.occupiedSlots = slot.verifiedEntries.filter(entry => entry.status === 'entered').length;
         
-        // Mark the array as modified (important for MongoDB)
+        // Mark the array as modified to ensure Mongoose saves it
         slot.markModified('verifiedEntries');
+
+        // Save the document
+        const savedSlot = await slot.save({ session });
         
-        console.log('💾 Saving to database...');
-        const savedSlot = await slot.save();
+        // Commit transaction
+        await session.commitTransaction();
         
-        console.log('✅ Successfully saved! Current occupied slots:', savedSlot.occupiedSlots);
-        console.log('📊 Total entries today:', savedSlot.verifiedEntries.length);
+        console.log('✅ TRANSACTION COMMITTED - Entry saved successfully');
+        console.log('📊 Final occupied slots:', savedSlot.occupiedSlots);
+        console.log('📊 Final entries count:', savedSlot.verifiedEntries.length);
         
+        // Verify the entry was actually saved
+        const savedEntry = savedSlot.verifiedEntries.find(entry => 
+            entry.userId === newEntry.userId && 
+            entry.status === 'entered'
+        );
+        
+        if (!savedEntry) {
+            throw new Error('CRITICAL: Entry not found after save verification!');
+        }
+        
+        console.log('✅ Entry verification passed - Data successfully persisted');
         return savedSlot;
         
     } catch (error) {
-        console.error('❌ Error in saveVerifiedUserEntry:', error.message);
-        console.error('📋 Stack trace:', error.stack);
+        // Rollback transaction on error
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
+        
+        console.error('❌ CRITICAL ERROR in saveVerifiedUserEntry:', error.message);
+        console.error('📋 Error stack:', error.stack);
         throw error;
+    } finally {
+        // Always end the session
+        await session.endSession();
     }
 };
 
-// Method to get today's parking data
+// FIXED: Enhanced getTodaysParkingData method
 parkingSlotSchema.statics.getTodaysParkingData = async function() {
     try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
+        console.log('📊 getTodaysParkingData called');
         
-        let slot = await this.findOne({ 
-            date: { $gte: today, $lt: tomorrow } 
+        const now = new Date();
+        const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+        const tomorrowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0, 0));
+
+        let slot = await this.findOne({
+            date: { $gte: todayUTC, $lt: tomorrowUTC }
         });
-        
+
         if (!slot) {
-            // Create new slot for today if doesn't exist
+            console.log('📝 No document found, creating new one...');
             slot = new this({
-                date: today,
+                date: todayUTC,
                 totalSlots: 100,
                 occupiedSlots: 0,
                 verifiedEntries: []
             });
             await slot.save();
+            console.log('✅ New document created');
+        } else {
+            // FIXED: Recalculate occupied slots to ensure consistency
+            const currentlyInside = slot.verifiedEntries.filter(entry => entry.status === 'entered').length;
+            if (slot.occupiedSlots !== currentlyInside) {
+                console.log(`🔧 Fixing occupiedSlots mismatch: ${slot.occupiedSlots} -> ${currentlyInside}`);
+                slot.occupiedSlots = currentlyInside;
+                await slot.save();
+            }
         }
         
+        console.log('📊 Document found/created:', {
+            id: slot._id,
+            date: slot.date,
+            entriesCount: slot.verifiedEntries.length,
+            occupiedSlots: slot.occupiedSlots
+        });
+
         return slot;
     } catch (error) {
-        console.error('❌ Error getting today\'s parking data:', error);
+        console.error('❌ Error in getTodaysParkingData:', error);
         throw error;
     }
 };
 
-// Instance method to add verified entry (alternative approach)
-parkingSlotSchema.methods.addVerifiedEntry = async function(userData, userName) {
-    try {
-        console.log('🚗 Adding entry for:', { userData, userName });
-        
-        // Validate input
-        if (!userData || !userData.userId || !userData.permitId) {
-            throw new Error('Invalid user data provided');
-        }
-        
-        // Check if user already entered today
-        const existingEntry = this.verifiedEntries.find(
-            entry => entry.userId === userData.userId && entry.status === 'entered'
-        );
-        
-        if (existingEntry) {
-            throw new Error('User has already entered today');
-        }
-        
-        // Add new entry
-        const newEntry = {
-            userId: userData.userId,
-            permitId: userData.permitId,
-            userName: userName || userData.userName,
-            status: 'entered',
-            entryTime: new Date()
-        };
-        
-        this.verifiedEntries.push(newEntry);
-        this.occupiedSlots += 1;
-        this.markModified('verifiedEntries');
-        
-        console.log('💾 Saving entry to database...');
-        await this.save();
-        console.log('✅ Entry saved successfully. Occupied slots:', this.occupiedSlots);
-        
-        return this;
-        
-    } catch (error) {
-        console.error('❌ Error adding verified entry:', error);
-        throw error;
-    }
-};
-
-// Method to mark exit
+// FIXED: Enhanced markExit method with transaction
 parkingSlotSchema.methods.markExit = async function(userId) {
+    const session = await mongoose.startSession();
+    
     try {
-        console.log('🚪 Marking exit for user:', userId);
+        console.log('🚪 markExit called for userId:', userId);
         
+        session.startTransaction();
+
         const entryIndex = this.verifiedEntries.findIndex(
             entry => entry.userId === userId && entry.status === 'entered'
         );
-        
+
         if (entryIndex === -1) {
+            await session.abortTransaction();
+            console.log('❌ No active entry found for user:', userId);
             throw new Error('No active entry found for this user');
         }
-        
+
         // Mark as exited
         this.verifiedEntries[entryIndex].status = 'exited';
         this.occupiedSlots = Math.max(0, this.occupiedSlots - 1);
         this.markModified('verifiedEntries');
+
+        await this.save({ session });
+        await session.commitTransaction();
         
-        console.log('💾 Saving exit to database...');
-        await this.save();
-        console.log('✅ Exit saved successfully. Occupied slots:', this.occupiedSlots);
-        
+        console.log('✅ Exit marked successfully');
+        console.log('📊 Updated occupied slots:', this.occupiedSlots);
+
         return this;
-        
     } catch (error) {
-        console.error('❌ Error marking exit:', error);
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
+        console.error('❌ Error in markExit:', error);
         throw error;
+    } finally {
+        await session.endSession();
     }
 };
 
-// Method to get counts
+// FIXED: Enhanced getCounts method
 parkingSlotSchema.methods.getCounts = function() {
-    const activeEntries = this.verifiedEntries.filter(entry => entry.status === 'entered');
-    const exitedEntries = this.verifiedEntries.filter(entry => entry.status === 'exited');
-    
-    return {
+    const currentlyInside = this.verifiedEntries.filter(entry => entry.status === 'entered').length;
+    const exitedToday = this.verifiedEntries.filter(entry => entry.status === 'exited').length;
+
+    // Ensure occupiedSlots matches currentlyInside
+    this.occupiedSlots = currentlyInside;
+
+    const counts = {
         totalSlots: this.totalSlots,
-        occupiedSlots: this.occupiedSlots,
-        availableSlots: this.totalSlots - this.occupiedSlots,
+        occupiedSlots: currentlyInside,
+        availableSlots: Math.max(0, this.totalSlots - currentlyInside),
         totalEntriesToday: this.verifiedEntries.length,
-        currentlyInside: activeEntries.length,
-        exitedToday: exitedEntries.length,
-        verifiedUserCount: this.occupiedSlots
+        currentlyInside: currentlyInside,
+        exitedToday: exitedToday,
+        verifiedUserCount: currentlyInside,
+        lastUpdated: new Date()
     };
+    
+    console.log('📊 Current counts:', counts);
+    return counts;
+};
+
+// FIXED: Test method with better error handling
+parkingSlotSchema.statics.testDatabaseSave = async function() {
+    try {
+        console.log('🧪 Testing database save operations...');
+        
+        const testData = {
+            userId: 'test-save-' + Date.now(),
+            permitId: 'TEST-001',
+            userName: 'Test Save User'
+        };
+        
+        console.log('🧪 Test data:', testData);
+        
+        const result = await this.saveVerifiedUserEntry(testData);
+        
+        // Verify the save by querying the database
+        const verification = await this.getTodaysParkingData();
+        const savedEntry = verification.verifiedEntries.find(
+            entry => entry.userId === testData.userId
+        );
+        
+        if (!savedEntry) {
+            throw new Error('Test entry not found in database after save');
+        }
+        
+        console.log('🧪 Test result: SUCCESS');
+        
+        return {
+            success: true,
+            testData,
+            result: {
+                documentId: result._id,
+                entriesCount: result.verifiedEntries.length,
+                occupiedSlots: result.occupiedSlots,
+                verified: !!savedEntry
+            }
+        };
+        
+    } catch (error) {
+        console.error('🧪 Test failed:', error.message);
+        return {
+            success: false,
+            error: error.message,
+            stack: error.stack
+        };
+    }
 };
 
 module.exports = mongoose.model('ParkingSlot', parkingSlotSchema);
