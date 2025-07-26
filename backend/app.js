@@ -65,6 +65,9 @@ app.get('/pages/employee/qrcode.html', (req, res) => {
 app.get('/pages/employee/payment-management.html', (req, res) => {
     res.sendFile(path.join(__dirname, `../frontend/pages/employee/payment-management.html`));
 });
+app.get('/pages/visitor/visitor.html', (req, res) => {
+    res.sendFile(path.join(__dirname, `../frontend/pages/visitor/visitor.html`));
+});
 
 
 // Create default admin if none exists
