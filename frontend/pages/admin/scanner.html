@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking QR Scanner</title>
+    <!-- Link to the CSS file -->
+    <link rel="stylesheet" href="../../css/scanner.css">
+</head>
+<body>
+    <!-- Main container for the scanner interface -->
+    <main class="scanner-container fade-in">
+        <div class="header">
+            <div class="scanner-icon">📱</div>
+            <h1>Scan Parking Permit</h1>
+            <p class="subtitle">Position the QR code within the camera frame</p>
+        </div>
+        
+        <!-- Status indicator shows the current state -->
+        <div class="status-indicator">
+            <span class="pulse-dot"></span>
+            <span id="statusText">Ready to scan</span>
+        </div>
+
+        <!-- This div is where the camera feed will be rendered -->
+        <div id="qr-reader">
+            <div class="scanning-overlay">
+                <div class="scan-line"></div>
+                <div class="corner top-left"></div>
+                <div class="corner top-right"></div>
+                <div class="corner bottom-left"></div>
+                <div class="corner bottom-right"></div>
+            </div>
+        </div>
+
+        <!-- This div will display the verification result (Success/Error) -->
+        <div id="qr-reader-result"></div>
+        
+        <!-- Button to start the camera initially -->
+        <button id="startScanButton">
+            🎯 Start Camera
+        </button>
+        
+        <!-- Button to scan again after a result is shown -->
+        <button id="rescanButton" style="display:none;">
+            🔄 Scan Again
+        </button>
+    </main>
+
+    <!-- Include the third-party QR scanner library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
+    <!-- Link to your custom JavaScript file -->
+    <script src="../../js/scanner.js"></script>
+</body>
+</html>
