@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userRole', data.user.role);
                     localStorage.setItem('userName', data.user.name);
-                    localStorage.setItem('userId', data.user.id); // Store MongoDB _id
+                    localStorage.setItem('userId', data.user.id); // Store MongoDB _id consistently
 
                     if (data.user.role === 'admin') {
                         window.location.href = 'pages/admin/dashboard.html';
@@ -185,7 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('userRole');
             localStorage.removeItem('userName');
-            localStorage.removeItem('userId');
+            localStorage.removeItem('userId'); // Remove consistently
+            localStorage.removeItem('userVehicleType'); // Remove visitor's vehicle type if stored
+            localStorage.removeItem('dbUserId'); // Clean up old key if it was ever used
+            alert('You have been logged out.');
             window.location.href = '../../index.html'; // Redirect to login page
         });
     });
@@ -229,263 +232,117 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- GENERIC PERMIT REQUEST FORM LOGIC (if not handled specifically by dashboard JS) ---
-    const submitPermitRequest = document.getElementById('submitPermitRequest');
-    if (submitPermitRequest) {
-        // Initialize permit form fields when modal opens
-        const requestPermitBtn = document.querySelector('[data-modal-target="requestPermitModal"]');
-        if (requestPermitBtn) {
-            requestPermitBtn.addEventListener('click', function() {
-                const permitIdField = document.getElementById('permitId');
-                if (permitIdField) permitIdField.value = 'PER' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-                const today = new Date().toISOString().split('T')[0];
-                const startDateField = document.getElementById('startDate');
-                if (startDateField) startDateField.value = today;
+    // --- VIOLATION FUNCTIONALITY (Only applicable if included on the page) ---
 
-                const form = document.getElementById('permitRequestForm');
-                if (form) {
-                    const errorMessages = form.querySelectorAll('.error-message');
-                    errorMessages.forEach(message => message.textContent = '');
-                }
-                calculateEndDate(); // Initial calculation
-            });
-        }
-
-        // Auto-calculate end date based on duration and start date
-        const durationSelect = document.getElementById('duration');
-        if (durationSelect) durationSelect.addEventListener('change', calculateEndDate);
-        const startDateField = document.getElementById('startDate');
-        if (startDateField) startDateField.addEventListener('change', calculateEndDate);
-
-        function calculateEndDate() {
-            const duration = document.getElementById('duration')?.value;
-            const startDate = document.getElementById('startDate')?.value;
-            const endDateField = document.getElementById('endDate');
-
-            if (!duration || !startDate || !endDateField) return;
-
-            let endDate = new Date(startDate);
-            switch(duration) {
-                case '1-month': endDate.setMonth(endDate.getMonth() + 1); break;
-                case '3-months': endDate.setMonth(endDate.getMonth() + 3); break;
-                case '6-months': endDate.setMonth(endDate.getMonth() + 6); break;
-                case '1-year': endDate.setFullYear(endDate.getFullYear() + 1); break;
-                default: return;
-            }
-            endDateField.value = endDate.toISOString().split('T')[0];
-        }
-
-        // Cancel permit request button (closes modal)
-        const cancelPermitRequestBtn = document.getElementById('cancelPermitRequest');
-        if (cancelPermitRequestBtn) {
-            cancelPermitRequestBtn.addEventListener('click', function() {
-                const modal = document.getElementById('requestPermitModal');
-                if (modal) {
-                    modal.classList.remove('show');
-                    setTimeout(() => { modal.style.display = 'none'; }, 300);
-                }
-            });
-        }
-
-        // Generic permit request submission logic (if not overridden by specific dashboard JS)
-        submitPermitRequest.addEventListener('click', async function() {
-            const form = document.getElementById('permitRequestForm');
-            if (!form) { console.error('Permit request form not found'); resetSubmitButton(); return; }
-
-            const submitBtn = this;
-            const spinner = submitBtn.querySelector('.fa-spinner');
-            const buttonText = submitBtn.querySelector('span');
-            spinner.style.display = 'inline-block';
-            buttonText.textContent = 'Processing...';
-            submitBtn.disabled = true;
-
-            const errorMessages = form.querySelectorAll('.error-message');
-            errorMessages.forEach(message => message.textContent = '');
-
-            const permitData = {
-                permitId: document.getElementById('permitId')?.value,
-                employeeId: document.getElementById('employeeId')?.value, // This is `empID`
-                permitType: document.getElementById('permitType')?.value,
-                ownerType: document.getElementById('ownerType')?.value,
-                duration: document.getElementById('duration')?.value,
-                vehicleNo: document.getElementById('vehicleNo')?.value,
-                vehicleType: document.getElementById('vehicleType')?.value,
-                startDate: document.getElementById('startDate')?.value,
-                endDate: document.getElementById('endDate')?.value,
-                notes: document.getElementById('notes')?.value || ''
-            };
-
-            let isValid = true;
-            if (!permitData.employeeId) { document.getElementById('employeeIdError').textContent = 'Employee ID is required'; isValid = false; }
-            if (!permitData.permitType) { document.getElementById('permitTypeError').textContent = 'Permit type is required'; isValid = false; }
-            if (!permitData.duration) { document.getElementById('durationError').textContent = 'Duration is required'; isValid = false; }
-            if (!permitData.vehicleNo) { document.getElementById('vehicleNoError').textContent = 'Vehicle number is required'; isValid = false; }
-            else if (permitData.vehicleNo.length < 5) { document.getElementById('vehicleNoError').textContent = 'Please enter a valid vehicle number'; isValid = false; }
-            if (!permitData.vehicleType) { document.getElementById('vehicleTypeError').textContent = 'Vehicle type is required'; isValid = false; }
-            if (!permitData.startDate) { document.getElementById('startDateError').textContent = 'Start date is required'; isValid = false; }
-
-            if (!isValid) {
-                resetSubmitButton();
-                return;
-            }
-
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:5000/api/permits', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(permitData)
-                });
-                const data = await res.json();
-
-                if (res.ok && data.success) {
-                    showNotification('Permit request submitted successfully!', 'success');
-                    closeModal();
-                } else {
-                    showNotification(data.message || 'Failed to submit permit request.', 'error');
-                }
-            } catch (error) {
-                console.error('Error submitting permit request:', error);
-                showNotification('An error occurred. Please try again.', 'error');
-            } finally {
-                resetSubmitButton();
-            }
-        });
-
-        function resetSubmitButton() {
-            const submitBtn = document.getElementById('submitPermitRequest');
-            if (submitBtn) {
-                const spinner = submitBtn.querySelector('.fa-spinner');
-                const buttonText = submitBtn.querySelector('span');
-                if (spinner) spinner.style.display = 'none';
-                if (buttonText) buttonText.textContent = 'Submit Request';
-                submitBtn.disabled = false;
-            }
-        }
-    }
-
-
-    // Initialize date pickers (using flatpickr)
-    const datePickers = document.querySelectorAll('.date-picker');
-    if (datePickers.length > 0 && typeof flatpickr !== 'undefined') {
-        datePickers.forEach(dp => {
-            flatpickr(dp, {
-                enableTime: dp.classList.contains('with-time'),
-                dateFormat: dp.classList.contains('with-time') ? "Y-m-d H:i" : "Y-m-d"
-            });
-        });
-    }
-
-       
-    // ===== NEW VIOLATION FUNCTIONALITY =====
-    
-    // Load user violations when on violations page
-    if (window.location.pathname.includes('violations.html')) {
-        loadUserViolations();
+    // Load user violations when on violations page (or a page that includes a data-table tbody)
+    if (document.querySelector('.data-table tbody')) { // Check if violations table exists
+        // Added this event listener to ensure loadUserViolations runs consistently on relevant pages
+        window.addEventListener('load', loadUserViolations); // Using 'load' for initial fetch
     }
 
     // Function to load violations for the current user
     async function loadUserViolations() {
-  const userId   = localStorage.getItem('userId');
-  const userType = localStorage.getItem('userRole');
-  const token    = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        const userType = localStorage.getItem('userRole');
+        const token = localStorage.getItem('token');
 
-  if (!userId || !token) return showViolationError('Please log in.');
+        // Only load if user is employee or admin, and tokens are present
+        if (!userId || !token || (userType !== 'employee' && userType !== 'admin')) {
+             // If table exists, show specific message for visitors/non-employees if they navigate here
+            const tableBody = document.querySelector('.data-table tbody');
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Violations are primarily for Employees/Admins.</td></tr>';
+            }
+            return showViolationError('Access restricted or no violations to display.');
+        }
 
-  const res = await fetch(
-    `http://localhost:5000/api/violations/user/${userId}?userType=${userType}`,
-    {
-      headers: { 'Authorization': `Bearer ${token}` }
+        try {
+            const res = await fetch(
+                `http://localhost:5000/api/violations/user/${userId}?userType=${userType}`,
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+
+            const data = await res.json();
+            if (data.success) {
+                populateViolationsTable(data.violations);
+                updateViolationStats(data.violations);
+            } else {
+                showViolationError(data.error || data.message || 'Failed to fetch violations.');
+            }
+        } catch (error) {
+            console.error('Error fetching user violations:', error);
+            showViolationError('Could not load violations. Server or network issue.');
+        }
     }
-  );
-
-            
-  const data = await res.json();
-  if (data.success) {
-    populateViolationsTable(data.violations);
-    updateViolationStats(data.violations);
-  } else {
-    showViolationError(data.error);
-  }
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  if (location.pathname.endsWith('violations.html')) {
-    loadUserViolations();
-  }
-});
 
     // Function to populate violations table
     function populateViolationsTable(violations) {
-  const tbody = document.querySelector('.data-table tbody');
-  tbody.innerHTML = '';
+        const tbody = document.querySelector('.data-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
 
-  if (violations.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6">No violations found.</td></tr>';
-    return;
-  }
-
-  violations.forEach(v => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${formatDate(v.date)}</td>
-      <td>${v.vehicleNo}</td>
-      <td>${v.violationType}</td>
-      <td>$${v.fineAmount.toFixed(2)}</td>
-      <td>${capitalizeFirstLetter(v.status || 'pending')}</td>
-      <td>
-        ${v.status === 'pending'
-          ? `<button onclick="acknowledgeViolation('${v._id}')">Ack</button>
-             <button onclick="resolveViolation('${v._id}')">Resolve</button>`
-          : `<span>—</span>`
+        if (violations.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6">No violations found.</td></tr>';
+            return;
         }
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+
+        violations.forEach(v => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${formatDate(v.date)}</td>
+                <td>${v.vehicleNo}</td>
+                <td>${v.violationType}</td>
+                <td>$${v.fineAmount ? v.fineAmount.toFixed(2) : '0.00'}</td>
+                <td>${capitalizeFirstLetter(v.status || 'pending')}</td>
+                <td>
+                    ${v.status === 'pending' || v.status === 'disputed'
+                        ? `<button class="btn btn-sm btn-primary pay-fine-btn" data-violation-id="${v._id}">Pay</button>
+                           <button class="btn btn-sm btn-secondary dispute-btn" data-violation-id="${v._id}">Dispute</button>`
+                        : `<span>—</span>`
+                    }
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 
     // Function to update violation statistics
     function updateViolationStats(violations) {
         const stats = {
             total: violations.length,
-            pending: violations.filter(v => !v.status || v.status === 'pending').length,
-            acknowledged: violations.filter(v => v.status === 'acknowledged').length,
-            resolved: violations.filter(v => v.status === 'resolved' || v.resolved).length
+            pending: violations.filter(v => !v.status || v.status === 'pending' || v.status === 'disputed').length,
+            paid: violations.filter(v => v.status === 'paid').length,
+            resolved: violations.filter(v => v.status === 'resolved').length
         };
 
-        // Update stats in UI if elements exist
         const totalElement = document.getElementById('totalViolations');
         const pendingElement = document.getElementById('pendingViolations');
-        const acknowledgedElement = document.getElementById('acknowledgedViolations');
+        const paidElement = document.getElementById('paidViolations'); // Assuming an element for paid
         const resolvedElement = document.getElementById('resolvedViolations');
 
         if (totalElement) totalElement.textContent = stats.total;
         if (pendingElement) pendingElement.textContent = stats.pending;
-        if (acknowledgedElement) acknowledgedElement.textContent = stats.acknowledged;
+        if (paidElement) paidElement.textContent = stats.paid;
         if (resolvedElement) resolvedElement.textContent = stats.resolved;
+
+        // For the employee dashboard's 'Pending Fines' overview
+        const pendingFinesDisplay = document.getElementById('pendingFines');
+        if (pendingFinesDisplay) {
+            const totalPendingFine = violations
+                                        .filter(v => v.status === 'pending' || v.status === 'disputed')
+                                        .reduce((sum, v) => sum + (v.fineAmount || 0), 0);
+            pendingFinesDisplay.textContent = `$${totalPendingFine.toFixed(2)}`;
+        }
     }
 
-    //resolve
-    async function resolveViolation(id) {
-  const token = localStorage.getItem('token');
-  const res = await fetch(`http://localhost:5000/api/violations/${id}/status`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ status: 'resolved' })
-  });
-  const data = await res.json();
-  if (data.success) loadUserViolations();
-}
+    // Global functions for violation actions (pay, dispute, acknowledge, resolve)
+    // These functions assume modals for pay/dispute are handled by page-specific JS (like employee.js)
+    // Or, you could integrate showModal here if you want generic modals.
+    // Given the employee.js handles modals, it's better to keep actions there.
+    // The previous script.js had acknowledge/resolve directly, I'm keeping those.
 
-
-    // Global functions for violation actions
     window.acknowledgeViolation = async function(violationId) {
         await updateViolationStatus(violationId, 'acknowledged');
     };
@@ -494,10 +351,10 @@ window.addEventListener('DOMContentLoaded', () => {
         await updateViolationStatus(violationId, 'resolved');
     };
 
-    // Function to update violation status
+    // Function to update violation status (backend call)
     async function updateViolationStatus(violationId, status) {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
             showNotification('Authentication required', 'error');
             return;
@@ -521,8 +378,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (data.success) {
                 showNotification(`Violation ${status} successfully!`, 'success');
-                // Reload violations to show updated status
-                loadUserViolations();
+                loadUserViolations(); // Reload to update table
             } else {
                 throw new Error(data.error || 'Failed to update status');
             }
@@ -535,7 +391,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // Helper function to show violation loading error
     function showViolationError(message) {
         const tableBody = document.querySelector('.data-table tbody');
-        
+        if (!tableBody) return;
+
         const errorHTML = `
             <tr>
                 <td colspan="6" style="text-align: center; padding: 2rem;">
@@ -548,51 +405,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 </td>
             </tr>
         `;
-        
-        if (tableBody) {
-            tableBody.innerHTML = errorHTML;
-        }
+        tableBody.innerHTML = errorHTML;
     }
-
-    // ===== END VIOLATION FUNCTIONALITY =====
-
-    // Dynamic Violations Table Rendering (for all dashboards)
-    const violationsData = [
-        {
-            date: '',
-            vehicle: '',
-            description: '',
-            fine: '',
-            status: ''
-        }
-       
-    ];
-
-    function renderViolationsTable(tableSelector, data) {
-        const table = document.querySelector(tableSelector);
-        if (!table) return;
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-        data.forEach((v, idx) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${v.date}</td>
-                <td>${v.vehicle}</td>
-                <td>${v.description}</td>
-                <td>$${v.fine.toFixed(2)}</td>
-                <td><span class="status-badge status-pending">Pending</span></td>
-                <td>
-                    <button class="btn btn-primary btn-sm pay-fine-btn" data-index="${idx}">Pay Fine</button>
-                    <button class="btn btn-secondary btn-sm dispute-btn" data-index="${idx}">Dispute</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    // Render violations if table exists
-    renderViolationsTable('.card .data-table', violationsData);
 
     // Registration link handling (from index.html)
     const registerLink = document.getElementById('registerLink');
@@ -602,7 +416,7 @@ window.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'register.html';
         });
     }
-// Public parking link handling (from index.html)
+    // Public parking link handling (from index.html)
     const publicParkingLink = document.getElementById('publicParkingLink');
     if (publicParkingLink) {
         publicParkingLink.addEventListener('click', function(e) {

@@ -1120,6 +1120,11 @@ function showNotification(message, type) {
         
         setupVisitorsTable();
     }
+
+    if (document.getElementById('visitorsTable')) {
+        setupVisitorsTable();
+        setupVisitorForm();
+    }
     // View non-employee details
     function viewNonEmployee(neId) {
         const ne = nonEmployees.find(n => n.id === neId);
@@ -1939,5 +1944,7 @@ function showNotification(message, type) {
         });
     }
     
+ }); 
 
-}); 
+   
+   
