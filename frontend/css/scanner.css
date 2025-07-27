@@ -1,281 +1,178 @@
-/* Modern QR Scanner Styles */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    color: #333;
-}
-
+/* Main Container */
 .scanner-container {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 40px;
-    max-width: 480px;
-    width: 100%;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  margin: 1.5rem auto;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  transition: all 0.3s ease;
 }
 
-.scanner-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
-    background-size: 200% 100%;
-    animation: shimmer 3s ease-in-out infinite;
+/* Header Icon */
+.header .icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
 }
 
-@keyframes shimmer {
-    0%, 100% { background-position: 200% 0; }
-    50% { background-position: -200% 0; }
-}
-
-.header {
-    margin-bottom: 32px;
-}
-
+/* Heading */
+.header h1,
 .scanner-container h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 8px;
-    letter-spacing: -0.5px;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
 }
 
+/* Subtitle */
 .subtitle {
-    color: #64748b;
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
 }
 
-.scanner-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 24px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 24px;
-}
-
-#qr-reader {
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border: 3px solid transparent;
-    background: linear-gradient(white, white) padding-box,
-               linear-gradient(135deg, #667eea, #764ba2) border-box;
-    margin-bottom: 24px;
-    position: relative;
-}
-
-#qr-reader video {
-    border-radius: 13px;
-}
-
-.scanning-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    border-radius: 13px;
-}
-
-.scan-line {
-    position: absolute;
-    left: 20px;
-    right: 20px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #667eea, transparent);
-    animation: scan 2s ease-in-out infinite;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
-}
-
-@keyframes scan {
-    0%, 100% { top: 20px; opacity: 0; }
-    50% { top: calc(50% - 1px); opacity: 1; }
-    100% { top: calc(100% - 22px); opacity: 0; }
-}
-
-.corner {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border: 3px solid #667eea;
-}
-
-.corner.top-left {
-    top: 15px;
-    left: 15px;
-    border-right: none;
-    border-bottom: none;
-}
-
-.corner.top-right {
-    top: 15px;
-    right: 15px;
-    border-left: none;
-    border-bottom: none;
-}
-
-.corner.bottom-left {
-    bottom: 15px;
-    left: 15px;
-    border-right: none;
-    border-top: none;
-}
-
-.corner.bottom-right {
-    bottom: 15px;
-    right: 15px;
-    border-left: none;
-    border-top: none;
-}
-
-#qr-reader-result {
-    padding: 16px 20px;
-    border-radius: 12px;
-    font-weight: 600;
-    min-height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 20px;
-}
-
-.result-success {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
-    transform: scale(1.02);
-}
-
-.result-error {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
-}
-
-.result-icon {
-    font-size: 20px;
-}
-
-#rescanButton, #startScanButton {
-    margin-top: 5px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 16px 32px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-#rescanButton:hover, #startScanButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
-}
-
-#rescanButton:active, #startScanButton:active {
-    transform: translateY(0);
-}
-
-.button-ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(0);
-    animation: ripple 0.6s linear;
-}
-
-@keyframes ripple {
-    to {
-        transform: scale(4);
-        opacity: 0;
-    }
-}
-
+/* Status Indicator */
 .status-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: rgba(102, 126, 234, 0.1);
-    border-radius: 20px;
-    color: #667eea;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: #667eea;
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
+  width: 12px;
+  height: 12px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  margin-right: 10px;
+  animation: pulse 1.2s infinite ease-in-out;
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
-@media (max-width: 600px) {
-    .scanner-container {
-        margin: 10px;
-        padding: 32px 24px;
-    }
-
-    .scanner-container h1 {
-        font-size: 2rem;
-    }
-
-    .subtitle {
-        font-size: 1rem;
-    }
+/* QR Reader */
+#qr-reader {
+  width: 100%;
+  max-width: 320px;
+  height: 220px;
+  border: 2px dashed #94a3b8;
+  border-radius: 12px;
+  margin: 1rem auto;
+  position: relative;
+  background: #f9fafb;
 }
 
-.fade-in {
-    animation: fadeIn 0.5s ease-out;
+/* Scan Overlay Animation */
+.scanning-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+.scan-line {
+  width: 100%;
+  height: 3px;
+  background: rgba(59, 130, 246, 0.8);
+  position: absolute;
+  animation: scan 2.5s linear infinite;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* QR Box Corners */
+.corner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #3b82f6;
+  position: absolute;
+}
+
+.top-left {
+  top: 0; left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.top-right {
+  top: 0; right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+.bottom-left {
+  bottom: 0; left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+.bottom-right {
+  bottom: 0; right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* Scan Result Box */
+#qr-reader-result {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 10px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Buttons */
+#startScanButton,
+#rescanButton {
+  display: inline-block;
+  margin: 1rem 0.5rem 0;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#startScanButton:hover,
+#rescanButton:hover {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .scanner-container {
+    padding: 1rem 1.25rem;
+  }
+
+  #qr-reader {
+    max-width: 100%;
+    height: 200px;
+  }
+
+  #startScanButton,
+  #rescanButton {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
 }
