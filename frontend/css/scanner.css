@@ -1,0 +1,178 @@
+/* Main Container */
+.scanner-container {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  margin: 1.5rem auto;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  transition: all 0.3s ease;
+}
+
+/* Header Icon */
+.header .icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Heading */
+.header h1,
+.scanner-container h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+
+/* Subtitle */
+.subtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+/* Status Indicator */
+.status-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.pulse-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  margin-right: 10px;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* QR Reader */
+#qr-reader {
+  width: 100%;
+  max-width: 320px;
+  height: 220px;
+  border: 2px dashed #94a3b8;
+  border-radius: 12px;
+  margin: 1rem auto;
+  position: relative;
+  background: #f9fafb;
+}
+
+/* Scan Overlay Animation */
+.scanning-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+.scan-line {
+  width: 100%;
+  height: 3px;
+  background: rgba(59, 130, 246, 0.8);
+  position: absolute;
+  animation: scan 2.5s linear infinite;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* QR Box Corners */
+.corner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #3b82f6;
+  position: absolute;
+}
+
+.top-left {
+  top: 0; left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.top-right {
+  top: 0; right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+.bottom-left {
+  bottom: 0; left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+.bottom-right {
+  bottom: 0; right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* Scan Result Box */
+#qr-reader-result {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 10px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Buttons */
+#startScanButton,
+#rescanButton {
+  display: inline-block;
+  margin: 1rem 0.5rem 0;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#startScanButton:hover,
+#rescanButton:hover {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .scanner-container {
+    padding: 1rem 1.25rem;
+  }
+
+  #qr-reader {
+    max-width: 100%;
+    height: 200px;
+  }
+
+  #startScanButton,
+  #rescanButton {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+}

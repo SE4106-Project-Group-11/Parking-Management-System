@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Violations - Visitor Panel</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/visitor.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Visitor Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i> My Permit
+                    </a>
+                </li>
+                <li>
+                    <a href="violations.html" class="active">
+                        <i class="fas fa-exclamation-triangle"></i> Violations
+                    </a>
+                </li>
+                <li>
+                    <a href="qrcode.html">
+                        <i class="fas fa-qrcode"></i> My QR Code
+                    </a>
+                </li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li>
+                    <a href="../../index.html" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>My Violations</h1>
+                <div class="user-info">
+                    <span id="userName"></span>
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Violations Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>All Violations</h2>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Vehicle No.</th>
+                                <th>Violation</th>
+                                <th>Fine Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                       <tbody>
+
+                       </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+           <script>
+    // On page load, display user name
+    document.getElementById('userName').textContent = localStorage.getItem('userName') || '';
+
+    // Fetch and render violations for the logged-in user
+    async function loadUserViolations() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const userType = localStorage.getItem('userRole');
+      if (!token || !userId) return;
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/violations/user/${userId}?userType=${userType}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          populateViolationsTable(data.violations);
+        }
+      } catch (err) {
+        console.error('Error loading violations:', err);
+      }
+    }
+
+    function populateViolationsTable(violations) {
+      const tbody = document.querySelector('.data-table tbody');
+      tbody.innerHTML = '';
+      if (!violations.length) {
+        tbody.innerHTML = '<tr><td colspan="6">No violations found.</td></tr>';
+        return;
+      }
+      violations.forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${new Date(v.date).toLocaleDateString()}</td>
+          <td>${v.vehicleNo}</td>
+          <td>${v.violationType}</td>
+          <td>$${v.fineAmount.toFixed(2)}</td>
+          <td>${v.status || 'pending'}</td>
+          <td><em>N/A</em></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (location.pathname.endsWith('violations.html')) loadUserViolations();
+    });
+  </script>
+   
+
+</body>
+</html> 

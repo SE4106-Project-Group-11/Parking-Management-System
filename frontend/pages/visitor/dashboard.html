@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visitor Dashboard - Parking Management System</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/employee.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <div class="dashboard-container"> 
+      <aside class="sidebar">
+            <div class="sidebar-header">
+              <i class="fas fa-parking"></i>
+                <h3>Visitor Panel</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> My Permits</a></li>
+                <li><a href="violations.html"><i class="fas fa-exclamation-triangle"></i> My Violations</a></li>
+                <li><a href="qrcode.html"><i class="fas fa-qrcode"></i> My QR Code</a></li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li><a href="../../index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+           
+       
+
+        <main class="main-content"> 
+          <header class="main-header">
+                
+                    <h2 id="visitorNameDisplay">Welcome, Visitor!</h2>
+                    <div class="user-info">
+                        <p>Email: <span id="visitorEmailDisplay">Loading email...</span><br>
+                        Vehicle: <span id="visitorVehicleDisplay">Loading vehicle...</span></p>
+                    </div>
+                
+              </header><br>
+
+            <section class="dashboard-overview">
+                
+                    <div class="card">
+                        <h3>Current Permit Status</h3>
+                        <div  class="permit-status">
+                            <span class="status-badge status-inactive" id="currentPermitStatus">No Active Permit</span>
+                        </div>
+                        <p class="permit-detail" id="currentPermitDetails"></p>
+                    </div>
+                </section>
+
+            <section id="permits" class="dashboard-overview"> 
+              <div class="card">
+                    <h2>My Parking Permits</h2>
+                    <button class="btn btn-primary" id="requestPermitBtn">
+                        <i class="fas fa-plus"></i> Request New Permit
+                    </button>
+                </div>
+                </section>
+                
+
+                <section class="dashboard-data">
+                <div class="card">
+                    <h3>Permit History</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Permit ID</th>
+                                <th>Permit Type</th>
+                                <th>Vehicle No.</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="permitsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            </main>
+    </div>
+
+    <div id="requestPermitModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Request Parking Permit</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <form id="permitRequestForm">
+          <div class="form-group">
+            <label for="permitId">Permit ID</label>
+            <input type="text" id="permitId" readonly />
+          </div>
+          <div class="form-group">
+            <label for="ownerType">Owner Type</label>
+            <input type="text" id="ownerType" value="visitor" readonly />
+          </div>
+          <div class="form-group">
+            <label for="vehicleNo">Vehicle Number</label>
+            <input type="text" id="vehicleNo" placeholder="Vehicle Number" required />
+            <div class="error-message" id="vehicleNoError"></div>
+          </div>
+          <div class="form-group">
+            <label for="vehicleType">Vehicle Type</label>
+            <select id="vehicleType" required>
+              <option value="">Select Vehicle Type</option>
+              <option value="car">Car</option>
+              <option value="van">Van</option>
+              <option value="bike">Bike</option>
+              <option value="wheel">Three-Wheel</option>
+            </select>
+            <div class="error-message" id="vehicleTypeError"></div>
+          </div>
+          <div class="form-group">
+            <label for="permitType">Permit Duration</label>
+            <select id="permitType" required>
+              <option value="">Select Duration</option>
+              <option value="day">Day</option>
+              <option value="week">Week</option>
+              <option value="month">Month</option>
+              <option value="annual">Annual</option>
+            </select>
+            <div class="error-message" id="permitTypeError"></div>
+          </div>
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" required />
+            <div class="error-message" id="startDateError"></div>
+          </div>
+          <div class="form-group">
+            <label for="endDate">End Date (Auto-calculated)</label>
+            <input type="date" id="endDate" readonly />
+            <div class="error-message" id="endDateError"></div>
+          </div>
+          <div class="form-group">
+            <label for="notes">Notes (Optional)</label>
+            <textarea id="notes" placeholder="Any additional notes"></textarea>
+          </div>
+          <div class="modal-buttons">
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+            <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="../../js/script.js"></script>
+    <script src="../../js/visitor.js"></script>
+
+    <script>
+        const role = localStorage.getItem('userRole');
+        const allowedRole = 'visitor';
+
+        if (role !== allowedRole) {
+            alert('Access denied. Please log in as a visitor.'); // More informative message
+            window.location.href = '../../index.html'; // Redirect to your main login page
+        }
+    </script>
+</body>
+</html>

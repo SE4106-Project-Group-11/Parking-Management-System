@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking QR Scanner</title>
+    <!-- Link to the CSS file -->
+    <link rel="stylesheet" href="../../css/scanner.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/admin.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-parking"></i>
+                <h2>Admin Panel</h2>
+            </div>
+             <ul class="sidebar-menu">
+                <li><a href="scanner.html"class="active"><i class="fa-solid fa-qrcode"></i>QR Scanner</a></li>
+                <li><a href="dashboard.html" ><i class="fas fa-id-card"></i> Permit Requests</a></li>
+                <li><a href="employees.html"><i class="fas fa-users"></i> Employees</a></li>
+                <li><a href="nonemployees.html"><i class="fas fa-user"></i> Non-Employees</a></li>
+                <li><a href="visitors.html"><i class="fas fa-user-friends"></i> Visitors</a></li>
+                <li><a href="violation-management.html"><i class="fas fa-exclamation-triangle"></i> Violations</a></li>
+                <li><a href="payment-management.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                
+                <li><a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Mobile Sidebar Toggle -->
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+
+    <!-- Main container for the scanner interface -->
+    <main class="main-content">
+    <div class="scanner-container">
+        <div class="header">
+            <div class="icon">📱</div>
+            <h1>Scan Parking Permit</h1>
+            <p class="subtitle">Position the QR code within the camera frame</p>
+        </div>
+
+        <div class="status-indicator">
+            <span class="pulse-dot"></span>
+            <span id="statusText">Ready to scan</span>
+        </div>
+
+        <div id="qr-reader">
+            <div class="scanning-overlay">
+                <div class="scan-line"></div>
+                <div class="corner top-left"></div>
+                <div class="corner top-right"></div>
+                <div class="corner bottom-left"></div>
+                <div class="corner bottom-right"></div>
+            </div>
+        </div>
+
+        <div id="qr-reader-result"></div>
+
+        <button id="startScanButton"> Start Camera</button>
+        <button id="rescanButton" style="display:none;">🔄 Scan Again</button>
+    </div>
+</main>
+
+    <!-- Include the third-party QR scanner library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
+    <!-- Link to your custom JavaScript file -->
+    <script src="../../js/scanner.js"></script>
+</body>
+</html>
