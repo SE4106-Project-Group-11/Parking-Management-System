@@ -195,7 +195,7 @@ function populatePermitRequestsTable() {
         row.innerHTML = `
             <td>${permit.userId}</td>
             <td>${permit.userType}</td>
-            <td>${permit.vehicleNumber}</td>
+            <td>${permit.vehicleNo}</td>
             <td>${new Date(permit.validFrom).toLocaleDateString()} - ${new Date(permit.validTo).toLocaleDateString()}</td>
             <td><span class="status-badge ${permit.status}">${permit.status}</span></td>
             <td class="btn-actions">
