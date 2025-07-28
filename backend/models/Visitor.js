@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const visitorSchema = new mongoose.Schema({
+  visitorID: { type: String, unique: true },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   nic: { type: String, required: true , unique: true},
@@ -16,6 +17,8 @@ const visitorSchema = new mongoose.Schema({
     default: 'pending'
   },
   permits: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Permit' }]
+  }, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Visitor', visitorSchema);
