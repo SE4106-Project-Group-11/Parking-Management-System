@@ -131,8 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
-    // Initialize the dashboard
-    initAdminDashboard();
+   
 
     // Sidebar toggle for mobile
     const sidebarToggleBtn = document.getElementById('sidebarToggle');
@@ -181,6 +180,8 @@ function initAdminDashboard() {
         });
 }
 
+ // Initialize the dashboard
+    initAdminDashboard();
 // Function to populate the permit requests table
 function populatePermitRequestsTable() {
     const tableBody = document.getElementById('permitRequestsTable');
@@ -198,7 +199,7 @@ function populatePermitRequestsTable() {
             <td>${new Date(permit.validFrom).toLocaleDateString()} - ${new Date(permit.validTo).toLocaleDateString()}</td>
             <td><span class="status-badge ${permit.status}">${permit.status}</span></td>
             <td class="btn-actions">
-                ${permit.status === 'Pending' ? 
+                ${permit.status?.toLowerCase() === 'pending' ?  
                     `<button class="btn btn-primary btn-sm approve-btn" data-id="${permit._id}">Approve</button>
                      <button class="btn btn-danger btn-sm reject-btn" data-id="${permit._id}">Reject</button>` : 
                     `<button class="btn btn-primary btn-sm view-btn" data-id="${permit._id}">View</button>`
