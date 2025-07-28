@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const currentPermitStatus = document.getElementById('currentPermitStatus');
     const currentPermitDetails = document.getElementById('currentPermitDetails');
-    const pendingViolationsCount = document.getElementById('pendingViolationsCount');
+   // const pendingViolationsCount = document.getElementById('pendingViolationsCount');
     const permitsTableBody = document.getElementById('permitsTableBody');
     const violationsTableBody = document.getElementById('violationsTableBody');
 
@@ -66,12 +66,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 3. Populate Dashboard Overview Cards
             updatePermitCard(employeeData.permits);
-            updateViolationsCard(employeeData.violations);
+            //updateViolationsCard(employeeData.violations);
             // fetchAvailableParkingSpots(); // Uncomment if needed
 
             // 4. Populate Tables with fetched data
             renderPermitsTable(employeeData.permits);
-            renderViolationsTable(employeeData.violations);
+           // renderViolationsTable(employeeData.violations);
 
         } else {
             console.error('Failed to load employee data:', responseData.message || 'Unknown error');
@@ -100,10 +100,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function updateViolationsCard(violations) {
+   /* function updateViolationsCard(violations) {
         const pendingCount = violations.filter(v => v.status === 'pending' || v.status === 'disputed').length;
         pendingViolationsCount.textContent = pendingCount;
-    }
+    }*/
 
     function renderPermitsTable(permits) {
         permitsTableBody.innerHTML = '';
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    function renderViolationsTable(violations) {
+    /*function renderViolationsTable(violations) {
         violationsTableBody.innerHTML = '';
         if (!violations || violations.length === 0) {
             violationsTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No violation history found.</td></tr>';
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             violationsTableBody.appendChild(row);
         });
     }
-
+*/
     // --- Event Listeners for Modals and Actions ---
 
     const requestPermitBtn = document.getElementById('requestPermitBtn');
@@ -199,213 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-/*
-    document.body.addEventListener('click', async function(e) {
-        if (e.target.classList.contains('pay-fine-btn')) {
-            const violationId = e.target.getAttribute('data-violation-id');
-            const violationToPay = await fetchViolationDetails(violationId);
 
-            if (violationToPay) {
-                showPayViolationModal(violationToPay);
-            } else {
-                showNotification('Violation details could not be loaded.', 'error');
-            }
-        }
-        if (e.target.classList.contains('dispute-btn')) {
-            const violationId = e.target.getAttribute('data-violation-id');
-            const violationToDispute = await fetchViolationDetails(violationId);
-
-            if (violationToDispute) {
-                showDisputeViolationModal(violationToDispute);
-            } else {
-                showNotification('Violation details could not be loaded.', 'error');
-            }
-        }
-        if (e.target.classList.contains('view-permit-btn')) {
-            const permitId = e.target.getAttribute('data-permit-id');
-            showNotification(`Viewing details for Permit ID: ${permitId}`, 'info');
-        }
-        if (e.target.classList.contains('renew-permit-btn')) {
-            const permitId = e.target.getAttribute('data-permit-id');
-            showNotification(`Renewing Permit ID: ${permitId}`, 'info');
-        }
-    });
-
-    // --- Helper Functions to Fetch Data for Modals ---
-
-    async function fetchViolationDetails(violationDbId) {
-        try {
-            const res = await fetch(`http://localhost:5000/api/violations/${violationDbId}`, {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                return data.violation;
-            } else {
-                console.error('Failed to fetch violation details:', data.message);
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching violation details:', error);
-            return null;
-        }
-    }
-
-    // --- Functions to Show Modals with Dynamic Content ---
-    // These functions assume `showModal` and `closeModal` are available globally from `script.js`
-
-    function showPayViolationModal(violation) {
-        const modalContent = `
-            <div class="modal-header">
-                <h2>Pay Violation Fine</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Violation ID:</strong> ${violation.violationId}</p>
-                <p><strong>Vehicle:</strong> ${violation.vehicleNo}</p>
-                <p><strong>Violation Type:</strong> ${violation.violationType}</p>
-                <p><strong>Fine Amount:</strong> $${violation.fineAmount ? violation.fineAmount.toFixed(2) : '0.00'}</p>
-                <form id="payFineForm" data-violation-id="${violation._id}">
-                    <div class="form-group">
-                        <label for="paymentMethod">Payment Method</label>
-                        <select id="paymentMethod" class="form-control" required>
-                            <option value="">Select Method</option>
-                            <option value="card">Card</option>
-                            <option value="paypal">Paypal</option>
-                            <option value="cash">Cash</option>
-                        </select>
-                    </div>
-                    <div class="modal-buttons">
-                        <button type="submit" class="btn btn-primary">Confirm Payment</button>
-                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        `;
-        showModal(modalContent); // Assumes showModal is defined globally in script.js
-
-        document.getElementById('payFineForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formViolationId = this.getAttribute('data-violation-id');
-            const paymentMethod = document.getElementById('paymentMethod').value;
-            if (!paymentMethod) {
-                showNotification('Please select a payment method.', 'error');
-                return;
-            }
-
-            try {
-                const submitBtn = this.querySelector('button[type="submit"]');
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Processing...';
-
-                const res = await fetch(`http://localhost:5000/api/violations/${formViolationId}/pay`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ mode: paymentMethod })
-                });
-                const data = await res.json();
-
-                if (res.ok && data.success) {
-                    showNotification('Payment successful! Violation status updated.', 'success');
-                    closeModal(); // Assumes closeModal is defined globally in script.js
-                    location.reload();
-                } else {
-                    showNotification(data.message || 'Payment failed.', 'error');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Confirm Payment';
-                }
-            } catch (error) {
-                console.error('Error processing payment:', error);
-                showNotification('An error occurred during payment.', 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Confirm Payment';
-            }
-        });
-    }
-
-    function showDisputeViolationModal(violation) {
-        const modalContent = `
-            <div class="modal-header">
-                <h2>Dispute Violation</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Violation ID:</strong> ${violation.violationId}</p>
-                <p><strong>Vehicle:</strong> ${violation.vehicleNo}</p>
-                <p><strong>Violation Type:</strong> ${violation.violationType}</p>
-                <p><strong>Fine Amount:</strong> $${violation.fineAmount ? violation.fineAmount.toFixed(2) : '0.00'}</p>
-                <form id="disputeForm" data-violation-id="${violation._id}">
-                    <div class="form-group">
-                        <label for="disputeReason">Reason for Dispute</label>
-                        <select id="disputeReason" class="form-control" required>
-                            <option value="">Select Reason</option>
-                            <option value="incorrectVehicle">Incorrect Vehicle Information</option>
-                            <option value="permissionGranted">Had Permission to Park</option>
-                            <option value="emergencySituation">Emergency Situation</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="disputeExplanation">Detailed Explanation</label>
-                        <textarea id="disputeExplanation" class="form-control" rows="5" required></textarea>
-                    </div>
-                    <div class="modal-buttons">
-                        <button type="submit" class="btn btn-primary">Submit Dispute</button>
-                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        `;
-        showModal(modalContent); // Assumes showModal is defined globally in script.js
-
-        document.getElementById('disputeForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formViolationId = this.getAttribute('data-violation-id');
-            const reason = document.getElementById('disputeReason').value;
-            const explanation = document.getElementById('disputeExplanation').value;
-
-            if (!reason || !explanation) {
-                showNotification('Please fill all dispute fields.', 'error');
-                return;
-            }
-
-            try {
-                const submitBtn = this.querySelector('button[type="submit"]');
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Processing...';
-
-                const res = await fetch(`http://localhost:5000/api/violations/${formViolationId}/dispute`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ reason, explanation })
-                });
-                const data = await res.json();
-
-                if (res.ok && data.success) {
-                    showNotification('Dispute submitted! Status updated.', 'success');
-                    closeModal();
-                    location.reload();
-                } else {
-                    showNotification(data.message || 'Dispute submission failed.', 'error');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Submit Dispute';
-                }
-            } catch (error) {
-                console.error('Error submitting dispute:', error);
-                showNotification('An error occurred during dispute submission.', 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Dispute';
-            }
-        });
-    }
-*/
     // --- Utility Functions (These were provided in your `script.js` - ensure global accessibility) ---
     // If you are still getting 'xxx is not defined', then `showNotification`, `showModal`, `closeModal`,
     // `formatDate`, `capitalizeFirstLetter` must be copied directly into `employee.js` (outside `DOMContentLoaded`).
