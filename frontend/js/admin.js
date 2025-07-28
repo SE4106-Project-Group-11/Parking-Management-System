@@ -196,7 +196,11 @@ function populatePermitRequestsTable() {
             <td>${permit.userId}</td>
             <td>${permit.userType}</td>
             <td>${permit.vehicleNo}</td>
-            <td>${new Date(permit.validFrom).toLocaleDateString()} - ${new Date(permit.validTo).toLocaleDateString()}</td>
+            <td>${
+    permit.startDate && permit.endDate
+      ? `${new Date(permit.startDate).toLocaleDateString()} - ${new Date(permit.endDate).toLocaleDateString()}`
+      : 'Invalid Date'
+}</td>
             <td><span class="status-badge ${permit.status}">${permit.status}</span></td>
             <td class="btn-actions">
                 ${permit.status?.toLowerCase() === 'pending' ?  
